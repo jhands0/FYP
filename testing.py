@@ -6,15 +6,14 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-from tensorflow.math import confusion_matrix
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 
 import joblib as jl
 
-dataset = "coranary"
-classifier = "healthy-coranary"
+dataset = "classifier_cerebo_coranary"
+classifier = "cerebo-coranary"
 
 data = pd.read_csv(f"datasets/{dataset}.csv")
 
@@ -58,6 +57,14 @@ for name, model in models.items():
     cm_plot = sns.heatmap(cm, annot=True)
     cm_plot.figure.savefig(f"models/{classifier}/{name}.png")
 
-results = ann.evaluate(X_ann_test, y_ann_test, verbose=64)
+
+results = ann.evaluate(X_ann_test, y_ann_test, batch_size=64, verbose=0)
 score = results[1]
 print(f"Accuracy score for artifical_neural_network is {score * 100}")
+
+predictions = ann.predict(X_ann_test, batch_size=64, verbose=0)
+predictions = np.where(predictions > 0.5, 1, 0)
+cm = confusion_matrix(y_ann_test, predictions)
+plt.figure(figsize=(10, 7))
+cm_plot = sns.heatmap(cm, annot=True)
+cm_plot.figure.savefig(f"models/{classifier}/artificial_neural_network.png")
