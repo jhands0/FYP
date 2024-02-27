@@ -14,7 +14,6 @@ from sklearn.preprocessing import LabelEncoder
 import keras #ANN
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.wrappers.scikit_learn import KerasClassifier # Wrapper to allow MLP/ANN to interact with sklearn modules
 
 from sklearn.svm import SVC # Support Vector Machine
 from sklearn.neighbors import KNeighborsClassifier # K Neighbour Classifier
@@ -90,4 +89,4 @@ for name, model in models.items():
 
 model = ann.fit(X_ann_train_smote, y_ann_train_smote, epochs=100, batch_size=64)
 print("artificial_neural_network trained.")
-jl.dump(value=model, filename=f"models/{classifier}/artificial_neural_network.pkl")
+jl.dump(value=ann, filename=f"models/{classifier}/artificial_neural_network.pkl")

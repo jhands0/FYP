@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
+from tensorflow.math import confusion_matrix
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
 
 import joblib as jl
 
@@ -20,6 +24,14 @@ y = data['label']
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
 
 # Import models
+ann = jl.load(f"models/{classifier}/artificial_neural_network.pkl")
+
+sc = StandardScaler()
+X_ann_test = sc.fit_transform(X_test)
+
+le = LabelEncoder()
+le.fit(y_test)
+y_ann_test = le.transform(y_test)
 
 dt = jl.load(f"models/{classifier}/decision_tree.pkl")
 gnb = jl.load(f"models/{classifier}/gaussian_naive_bayes.pkl")
@@ -45,3 +57,7 @@ for name, model in models.items():
     plt.figure(figsize=(10, 7))
     cm_plot = sns.heatmap(cm, annot=True)
     cm_plot.figure.savefig(f"models/{classifier}/{name}.png")
+
+results = ann.evaluate(X_ann_test, y_ann_test, verbose=64)
+score = results[1]
+print(f"Accuracy score for artifical_neural_network is {score * 100}")
