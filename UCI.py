@@ -9,4 +9,6 @@ y = heart_disease.data.targets
   
 combined = X.join(y)
 
+print(combined['num'].value_counts())
+
 combined.to_csv("datasets/HeartDisease.csv")
