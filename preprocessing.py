@@ -34,10 +34,13 @@ print(cerebo_coronary.nunique())
 print(arterial.nunique())
 
 '''
+# Removing NaNs
 
+coronary.dropna()
+cerebo_coronary.dropna()
+arterial.dropna()
 
 # Combining data sets
-
 
 def normalize(value):
     if value > 0:
@@ -75,8 +78,9 @@ coronary['famhist'] = coronary['famhist'].map(normalize_string)
 coronary['alcohol'] = coronary['alcohol'].map(normalize)
 
 coronary_selector = SelectKBest(chi2, k=7)
-best_coronary = coronary_selector.fit_transform(coronary.drop(columns=['chd']), coronary['chd'])
-print(coronary.iloc[:, coronary_selector.get_support()])
+coronary_selector.fit(coronary.drop(columns=['chd']), coronary['chd'])
+best_coronary = coronary_selector.transform(coronary.drop(columns=['chd']))
+print(pd.DataFrame({'columns' : coronary.drop(columns=['chd']).columns, 'kept' : coronary_selector.get_support()}))
 
 '''
 # Age, Smoker, Tobacco, Blood Pressure, Family History, BMI, Alcohol, Label
@@ -90,7 +94,16 @@ final_coronary['family_history'] = coronary['famhist'].map(normalize_string)
 final_coronary['bmi'] = coronary['obesity']
 final_coronary['alcohol'] = coronary['alcohol'].map(normalize)
 final_coronary['label'] = coronary['chd']
+'''
 
+cerebo_coronary['cigsPerDay'] = cerebo_coronary['cigsPerDay'].map(convertDaytoWeek)
+
+cerebo_coronary_selector = SelectKBest(chi2, k=10)
+cerebo_coronary_selector.fit(cerebo_coronary.drop(columns=['TenYearCHD']), cerebo_coronary['TenYearCHD'])
+best_cerebo_coronary = cerebo_coronary_selector.transform(cerebo_coronary.drop(columns=['TenYearCHD']))
+print(pd.DataFrame({'columns' : cerebo_coronary.drop(columns=['TenYearCHD']).columns, 'kept' : cerebo_coronary_selector.get_support()}))
+
+'''
 # Age, Sex, Smoker, Tobacco, BPMeds, Diabetes, Cholesterol, Blood Pressure, Heart Rate, BMI, Label (Glucose maybe?)
 final_cerebo_coronary = pd.DataFrame(columns=['age', 'sex', 'smoker', 'tobacco', 'blood_pressure_meds', 'diabetes', 'cholesterol', 'blood_pressure', 'heart_rate', 'bmi', 'label'])
 final_cerebo_coronary['age'] = cerebo_coronary['age']
@@ -106,6 +119,16 @@ final_cerebo_coronary['bmi'] = cerebo_coronary['BMI']
 final_cerebo_coronary['label'] = cerebo_coronary['TenYearCHD']
 
 final_cerebo = final_cerebo_coronary.drop(final_cerebo_coronary[final_cerebo_coronary.label == 1].index)
+'''
+arterial['cp'] = arterial['cp'].map(normalize)
+arterial['num'] = arterial['num'].map(normalize)
+
+arterial_selector = SelectKBest(chi2, k=7)
+arterial_selector.fit(arterial.drop(columns=['num']), arterial['num'])
+best_aterial = arterial_selector.transform(arterial.drop(columns=['num']))
+print(pd.DataFrame({'columns' : arterial.drop(columns=['num']).columns, 'kept' : arterial_selector.get_support()}))
+
+'''
 
 # Age, Sex, Chest Pain, Blood Pressure, Cholesterol, Blood Sugar, Heart Rate, Label
 final_arterial = pd.DataFrame(columns=['age', 'sex', 'chest_pain', 'blood_pressure', 'cholesterol', 'diabetes', 'heart_rate', 'label'])
