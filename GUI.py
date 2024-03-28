@@ -1,43 +1,37 @@
-import sys
+import tkinter as tk
+from tkinter import messagebox
 
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QLineEdit
+def submit():
+    messagebox.showinfo("Submitted", "Information submitted successfully!")
 
-class MyWidget(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        
-        self.title = "Heart Disease Classifier"
-        self.left = 50
-        self.top = 50
-        self.width = 400
-        self.height = 140
+root = tk.Tk()
+root.title("User Information")
 
-        self.initUI()
+labels = [
+    "Age", 
+    "Sex", 
+    "Height", 
+    "Weight", 
+    "Diabetes (Yes/No)", 
+    "Smoker (Yes/No)", 
+    "Amount of Tobacco", 
+    "Blood Pressure", 
+    "Do you take any blood pressure medicine",  
+    "Alcohol (Yes/No)",
+    "Cholesterol",
+    "Heart Rate",
+    "Chest Pain (Yes/No)",
+    "Family History (Yes/No)",
+    "Blood Sugar (Yes/No)"]
+entries = []
 
-    def initUI(self):
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+for i, label in enumerate(labels):
+    tk.Label(root, text=label).grid(row=i, column=0)
+    entries.append(tk.Entry(root))
+    entries[-1].grid(row=i, column=1)
 
-        self.textbox = QLineEdit(self)
-        self.textbox.move(70, 70)
-        self.textbox.resize(280,40)
+tk.Button(root, text="Submit", command=submit).grid(row=len(labels), column=1)
 
-        self.button = QPushButton("Submit")
-        self.button.alignment = Qt.AlignCenter
-
-        self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.button)
-
-        self.button.clicked.connect(self.submit)
-
-    def submit(self):
-        print("Clicked!")
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    widget = MyWidget()
-    widget.show()
-
-    sys.exit(app.exec())
+    root.mainloop()

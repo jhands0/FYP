@@ -9,11 +9,11 @@ health_art_record = pd.read_csv("datasets/arterial.csv")
 health_art_X = health_art_record.drop(columns=['Unnamed: 0', 'label'])
 health_art_y = health_art_record['label']
 
-health_cere_record = pd.read_csv("datasets/cerebo_coranary.csv")
+health_cere_record = pd.read_csv("datasets/cerebo_coronary.csv")
 health_cere_X = health_cere_record.drop(columns=['Unnamed: 0', 'label'])
 health_cere_y = health_cere_record['label']
 
-health_cor_record = pd.read_csv("datasets/coranary.csv")
+health_cor_record = pd.read_csv("datasets/coronary.csv")
 health_cor_X = health_cor_record.drop(columns=['Unnamed: 0', 'label'])
 health_cor_y = health_cor_record['label']
 
@@ -21,11 +21,11 @@ art_cere_record = pd.read_csv("datasets/classifier_arterial_cerebo.csv")
 art_cere_X = art_cere_record.drop(columns=['Unnamed: 0', 'label'])
 art_cere_y = art_cere_record['label']
 
-art_cor_record = pd.read_csv("datasets/classifier_arterial_coranary.csv")
+art_cor_record = pd.read_csv("datasets/classifier_arterial_coronary.csv")
 art_cor_X = art_cor_record.drop(columns=['Unnamed: 0', 'label'])
 art_cor_y = art_cor_record['label']
 
-cere_cor_record = pd.read_csv("datasets/classifier_cerebo_coranary.csv")
+cere_cor_record = pd.read_csv("datasets/classifier_cerebo_coronary.csv")
 cere_cor_X = cere_cor_record.drop(columns=['Unnamed: 0', 'label'])
 cere_cor_y = cere_cor_record['label']
 
@@ -63,12 +63,12 @@ health_cere_models = {
     "Random Forest" : rf_health_cere
 }
 
-dt_health_cor = jl.load("models/healthy-coranary/decision_tree.pkl")
-gnb_health_cor = jl.load("models/healthy-coranary/gaussian_naive_bayes.pkl")
-knn_health_cor = jl.load("models/healthy-coranary/k_neighbor.pkl")
-lr_health_cor = jl.load("models/healthy-coranary/logistic_regression.pkl")
-rf_health_cor = jl.load("models/healthy-coranary/random_forest.pkl")
-svm_health_cor = jl.load("models/healthy-coranary/support_vector_machine.pkl")
+dt_health_cor = jl.load("models/healthy-coronary/decision_tree.pkl")
+gnb_health_cor = jl.load("models/healthy-coronary/gaussian_naive_bayes.pkl")
+knn_health_cor = jl.load("models/healthy-coronary/k_neighbor.pkl")
+lr_health_cor = jl.load("models/healthy-coronary/logistic_regression.pkl")
+rf_health_cor = jl.load("models/healthy-coronary/random_forest.pkl")
+svm_health_cor = jl.load("models/healthy-coronary/support_vector_machine.pkl")
 
 health_cor_models = {
     "Support Vector Machine" : svm_health_cor,
@@ -95,12 +95,12 @@ art_cere_models = {
     "Random Forest" : rf_art_cere
 }
 
-dt_cere_cor = jl.load("models/cerebo-coranary/decision_tree.pkl")
-gnb_cere_cor = jl.load("models/cerebo-coranary/gaussian_naive_bayes.pkl")
-knn_cere_cor = jl.load("models/cerebo-coranary/k_neighbor.pkl")
-lr_cere_cor = jl.load("models/cerebo-coranary/logistic_regression.pkl")
-rf_cere_cor = jl.load("models/cerebo-coranary/random_forest.pkl")
-svm_cere_cor = jl.load("models/cerebo-coranary/support_vector_machine.pkl")
+dt_cere_cor = jl.load("models/cerebo-coronary/decision_tree.pkl")
+gnb_cere_cor = jl.load("models/cerebo-coronary/gaussian_naive_bayes.pkl")
+knn_cere_cor = jl.load("models/cerebo-coronary/k_neighbor.pkl")
+lr_cere_cor = jl.load("models/cerebo-coronary/logistic_regression.pkl")
+rf_cere_cor = jl.load("models/cerebo-coronary/random_forest.pkl")
+svm_cere_cor = jl.load("models/cerebo-coronary/support_vector_machine.pkl")
 
 cere_cor_models = {
     "Support Vector Machine" : svm_cere_cor,
@@ -111,12 +111,12 @@ cere_cor_models = {
     "Random Forest" : rf_cere_cor
 }
 
-dt_art_cor = jl.load("models/arterial-coranary/decision_tree.pkl")
-gnb_art_cor = jl.load("models/arterial-coranary/gaussian_naive_bayes.pkl")
-knn_art_cor = jl.load("models/arterial-coranary/k_neighbor.pkl")
-lr_art_cor = jl.load("models/arterial-coranary/logistic_regression.pkl")
-rf_art_cor = jl.load("models/arterial-coranary/random_forest.pkl")
-svm_art_cor = jl.load("models/arterial-coranary/support_vector_machine.pkl")
+dt_art_cor = jl.load("models/arterial-coronary/decision_tree.pkl")
+gnb_art_cor = jl.load("models/arterial-coronary/gaussian_naive_bayes.pkl")
+knn_art_cor = jl.load("models/arterial-coronary/k_neighbor.pkl")
+lr_art_cor = jl.load("models/arterial-coronary/logistic_regression.pkl")
+rf_art_cor = jl.load("models/arterial-coronary/random_forest.pkl")
+svm_art_cor = jl.load("models/arterial-coronary/support_vector_machine.pkl")
 
 art_cor_models = {
     "Support Vector Machine" : svm_art_cor,

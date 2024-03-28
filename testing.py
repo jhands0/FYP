@@ -12,8 +12,8 @@ from sklearn.preprocessing import LabelEncoder
 
 import joblib as jl
 
-dataset = "classifier_cerebo_coranary"
-classifier = "cerebo-coranary"
+dataset = "classifier_cerebo_coronary"
+classifier = "cerebo-coronary"
 
 data = pd.read_csv(f"datasets/{dataset}.csv")
 

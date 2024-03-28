@@ -30,8 +30,8 @@ import joblib as jl
 
 # Importing data
 
-data = pd.read_csv("datasets/classifier_cerebo_coranary.csv")
-classifier = "cerebo-coranary"
+data = pd.read_csv("datasets/classifier_cerebo_coronary.csv")
+classifier = "cerebo-coronary"
 
 X = data.drop(columns=['Unnamed: 0', 'label'])
 y = data['label']

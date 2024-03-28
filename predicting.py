@@ -177,12 +177,12 @@ health_cere_models = {
     "Random Forest" : rf_health_cere
 }
 
-dt_health_cor = jl.load("models/healthy-coranary/decision_tree.pkl")
-gnb_health_cor = jl.load("models/healthy-coranary/gaussian_naive_bayes.pkl")
-knn_health_cor = jl.load("models/healthy-coranary/k_neighbor.pkl")
-lr_health_cor = jl.load("models/healthy-coranary/logistic_regression.pkl")
-rf_health_cor = jl.load("models/healthy-coranary/random_forest.pkl")
-svm_health_cor = jl.load("models/healthy-coranary/support_vector_machine.pkl")
+dt_health_cor = jl.load("models/healthy-coronary/decision_tree.pkl")
+gnb_health_cor = jl.load("models/healthy-coronary/gaussian_naive_bayes.pkl")
+knn_health_cor = jl.load("models/healthy-coronary/k_neighbor.pkl")
+lr_health_cor = jl.load("models/healthy-coronary/logistic_regression.pkl")
+rf_health_cor = jl.load("models/healthy-coronary/random_forest.pkl")
+svm_health_cor = jl.load("models/healthy-coronary/support_vector_machine.pkl")
 
 health_cor_models = {
     "Support Vector Machine" : svm_health_cor,
@@ -207,7 +207,7 @@ def formatResultsArt(value):
     
 def formatResultsCor(value):
     if value == 1:
-        return "Coranary Heart Disease"
+        return "coronary Heart Disease"
     elif value == 2:
         return "Cerebovasular Disease"
 
@@ -237,7 +237,7 @@ elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(heal
     print("The classifier has predicted that you may have cerebovasular disease")
 
 elif sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
-    print("The classifier has predicted that you may have coranary heart disease")
+    print("The classifier has predicted that you may have coronary heart disease")
 
 elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
 
@@ -269,12 +269,12 @@ elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(hea
 
 elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 4:
 
-    dt_cere_cor = jl.load("models/cerebo-coranary/decision_tree.pkl")
-    gnb_cere_cor = jl.load("models/cerebo-coranary/gaussian_naive_bayes.pkl")
-    knn_cere_cor = jl.load("models/cerebo-coranary/k_neighbor.pkl")
-    lr_cere_cor = jl.load("models/cerebo-coranary/logistic_regression.pkl")
-    rf_cere_cor = jl.load("models/cerebo-coranary/random_forest.pkl")
-    svm_cere_cor = jl.load("models/cerebo-coranary/support_vector_machine.pkl")
+    dt_cere_cor = jl.load("models/cerebo-coronary/decision_tree.pkl")
+    gnb_cere_cor = jl.load("models/cerebo-coronary/gaussian_naive_bayes.pkl")
+    knn_cere_cor = jl.load("models/cerebo-coronary/k_neighbor.pkl")
+    lr_cere_cor = jl.load("models/cerebo-coronary/logistic_regression.pkl")
+    rf_cere_cor = jl.load("models/cerebo-coronary/random_forest.pkl")
+    svm_cere_cor = jl.load("models/cerebo-coronary/support_vector_machine.pkl")
 
     cere_cor_models = {
         "Support Vector Machine" : svm_cere_cor,
@@ -297,12 +297,12 @@ elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(heal
 
 elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
 
-    dt_art_cor = jl.load("models/arterial-coranary/decision_tree.pkl")
-    gnb_art_cor = jl.load("models/arterial-coranary/gaussian_naive_bayes.pkl")
-    knn_art_cor = jl.load("models/arterial-coranary/k_neighbor.pkl")
-    lr_art_cor = jl.load("models/arterial-coranary/logistic_regression.pkl")
-    rf_art_cor = jl.load("models/arterial-coranary/random_forest.pkl")
-    svm_art_cor = jl.load("models/arterial-coranary/support_vector_machine.pkl")
+    dt_art_cor = jl.load("models/arterial-coronary/decision_tree.pkl")
+    gnb_art_cor = jl.load("models/arterial-coronary/gaussian_naive_bayes.pkl")
+    knn_art_cor = jl.load("models/arterial-coronary/k_neighbor.pkl")
+    lr_art_cor = jl.load("models/arterial-coronary/logistic_regression.pkl")
+    rf_art_cor = jl.load("models/arterial-coronary/random_forest.pkl")
+    svm_art_cor = jl.load("models/arterial-coronary/support_vector_machine.pkl")
 
     art_cor_models = {
         "Support Vector Machine" : svm_art_cor,
