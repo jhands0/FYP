@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score, KFold
 from imblearn.over_sampling import SMOTE # SMOTE
 
 from sklearn.preprocessing import StandardScaler
@@ -14,6 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 import keras #ANN
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.wrappers.scikit_learn import KerasClassifier
 
 from sklearn.svm import SVC # Support Vector Machine
 from sklearn.neighbors import KNeighborsClassifier # K Neighbour Classifier
@@ -22,7 +23,6 @@ from sklearn.tree import DecisionTreeClassifier # Decision Tree
 from sklearn.linear_model import LogisticRegression # Logistic Regression
 from sklearn.ensemble import RandomForestClassifier # Random Forest
 
-from skorch import NeuralNetClassifier
 
 # Serialisation
 
@@ -30,8 +30,8 @@ import joblib as jl
 
 # Importing data
 
-data = pd.read_csv("datasets/classifier_cerebo_coronary.csv")
-classifier = "cerebo-coronary"
+data = pd.read_csv("datasets/classifier_arterial_cerebo.csv")
+classifier = "arterial-cerebo"
 
 X = data.drop(columns=['Unnamed: 0', 'label'])
 y = data['label']
@@ -43,20 +43,26 @@ le = LabelEncoder()
 le.fit(y)
 y_ann = le.transform(y)
 
-# Train Test Split and Oversampling
+# Cross Validation and Oversampling
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
-sm = SMOTE(random_state=24, k_neighbors=5)
-X_train_smote, y_train_smote = sm.fit_resample(X_train, y_train)
+kf = KFold(n_splits=5, shuffle=True, random_state=101)
+#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
 
-X_ann_train, X_ann_test, y_ann_train, y_ann_test = train_test_split(X_ann, y_ann, random_state=42, test_size=0.25)
-X_ann_train_smote, y_ann_train_smote = sm.fit_resample(X_ann_train, y_ann_train)
+sm = SMOTE(random_state=101, k_neighbors=5)
+X_smote, y_smote = sm.fit_resample(X, y)
 
-ann = Sequential()
-ann.add(Dense(16, input_dim=len(X.columns), activation='relu'))
-ann.add(Dense(12, activation='relu'))
-ann.add(Dense(1, activation='sigmoid'))
-ann.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+#X_ann_train, X_ann_test, y_ann_train, y_ann_test = train_test_split(X_ann, y_ann, random_state=42, test_size=0.25)
+X_ann_smote, y_ann_smote = sm.fit_resample(X_ann, y_ann)
+
+def create_ANN():
+    ann = Sequential()
+    ann.add(Dense(16, input_dim=len(X.columns), activation='relu'))
+    ann.add(Dense(12, activation='relu'))
+    ann.add(Dense(1, activation='sigmoid'))
+    ann.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return ann
+
+ann = create_ANN()
 
 svm = SVC()
 
@@ -82,11 +88,17 @@ models = {
 # Model Training and Serialization
 
 for name, model in models.items():
-    model.fit(X_train_smote, y_train_smote)
+    results = cross_val_score(model, X_smote, y_smote, cv=kf)
     print(f"{name} trained.")
+    print(f"{name} accuracy: {results}")
+    print(f"{name} mean accuracy: {results.mean()}")
     file = f"models/{classifier}/{name}.pkl"
     jl.dump(value=model, filename=file)
 
-model = ann.fit(X_ann_train_smote, y_ann_train_smote, epochs=100, batch_size=64)
+model = ann.fit(X_ann_smote, y_ann_smote, epochs=1)
 print("artificial_neural_network trained.")
+keras_clf = KerasClassifier(create_ANN)
+results = cross_val_score(keras_clf, X_ann_smote, y_ann_smote, cv=kf)
+print(f"artificial_neural_network accuracy: {results}")
+print(f"artificial_neural_network mean accuracy: {results.mean()}")
 jl.dump(value=ann, filename=f"models/{classifier}/artificial_neural_network.pkl")
