@@ -8,6 +8,7 @@ from imblearn.over_sampling import SMOTE # SMOTE
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
+from collections import Counter
 
 # Potential Models
 
@@ -56,9 +57,11 @@ y_ann = le.transform(y)
 
 kf = KFold(n_splits=5, shuffle=True, random_state=101)
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
+print(Counter(y_train))
 
 sm = SMOTE(random_state=101, k_neighbors=5)
 X_smote, y_smote = sm.fit_resample(X_train, y_train)
+print(Counter(y_smote))
 
 X_ann_train, X_ann_test, y_ann_train, y_ann_test = train_test_split(X_ann, y_ann, random_state=42, test_size=0.25)
 X_ann_smote, y_ann_smote = sm.fit_resample(X_ann_train, y_ann_train)
@@ -105,10 +108,8 @@ for name, model in models.items():
     file = f"models/{args.folder}/{name}.pkl"
     jl.dump(value=model, filename=file)
 
-model = ann.fit(X_ann_smote, y_ann_smote, epochs=1)
+model = ann.fit(X_ann_smote, y_ann_smote, epochs=100, verbose=0)
 print("artificial_neural_network trained.")
-keras_clf = KerasClassifier(create_ANN)
-results = cross_val_score(keras_clf, X_ann_smote, y_ann_smote, cv=kf)
 #print(f"artificial_neural_network accuracy: {results}")
 #print(f"artificial_neural_network mean accuracy: {results.mean()}")
-jl.dump(value=keras_clf, filename=f"models/{args.folder}/artificial_neural_network.pkl")
+jl.dump(value=ann, filename=f"models/{args.folder}/artificial_neural_network.pkl")

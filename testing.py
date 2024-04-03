@@ -32,7 +32,7 @@ y = data['label']
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
 
 # Import models
-#ann = jl.load(f"models/{classifier}/artificial_neural_network.pkl")
+ann = jl.load(f"models/{classifier}/artificial_neural_network.pkl")
 
 sc = StandardScaler()
 X_ann_test = sc.fit_transform(X_test)
@@ -73,7 +73,7 @@ for name, model in models.items():
     cm_plot = sns.heatmap(cm, annot=True)
     cm_plot.figure.savefig(f"models/{classifier}/{name}.png")
 
-'''
+
 results = ann.evaluate(X_ann_test, y_ann_test, batch_size=64, verbose=0)
 score = results[1]
 print(f"Accuracy score for artifical_neural_network is {score * 100}")
@@ -84,4 +84,3 @@ cm = confusion_matrix(y_ann_test, predictions)
 plt.figure(figsize=(10, 7))
 cm_plot = sns.heatmap(cm, annot=True)
 cm_plot.figure.savefig(f"models/{classifier}/artificial_neural_network.png")
-'''

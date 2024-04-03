@@ -207,7 +207,7 @@ def formatResultsArt(value):
     
 def formatResultsCor(value):
     if value == 1:
-        return "coronary Heart Disease"
+        return "Coronary Heart Disease"
     elif value == 2:
         return "Cerebovasular Disease"
 

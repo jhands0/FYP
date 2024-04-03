@@ -78,11 +78,10 @@ coronary['tobacco'] = coronary['tobacco'].map(convertKGtoPerWeek)
 coronary['famhist'] = coronary['famhist'].map(normalize_string)
 coronary['alcohol'] = coronary['alcohol'].map(normalize)
 
-coronary_selector = SelectKBest(chi2, k=7)
-coronary_selector.fit(coronary.drop(columns=['chd']), coronary['chd'])
-best_coronary = coronary_selector.transform(coronary.drop(columns=['chd']))
-print(pd.DataFrame({'columns' : coronary.drop(columns=['chd']).columns, 'kept' : coronary_selector.get_support()}))
-
+#x = coronary.drop(columns=['chd'])
+#coronary_scores, _ = chi2(x, coronary['chd'])
+#sns.barplot(x = x.columns, y = coronary_scores)
+#plt.show()
 
 # Age, Smoker, Tobacco, Blood Pressure, Family History, BMI, Alcohol, Label
 final_coronary = pd.DataFrame(columns=['age', 'smoker', 'tobacco', 'blood_pressure', 'cholesterol', 'family_history', 'bmi', 'alcohol', 'label'])
@@ -98,10 +97,10 @@ final_coronary['label'] = coronary['chd']
 
 cerebo_coronary['cigsPerDay'] = cerebo_coronary['cigsPerDay'].map(convertDaytoWeek)
 
-cerebo_coronary_selector = SelectKBest(chi2, k=10)
-cerebo_coronary_selector.fit(cerebo_coronary.drop(columns=['TenYearCHD']), cerebo_coronary['TenYearCHD'])
-best_cerebo_coronary = cerebo_coronary_selector.transform(cerebo_coronary.drop(columns=['TenYearCHD']))
-print(pd.DataFrame({'columns' : cerebo_coronary.drop(columns=['TenYearCHD']).columns, 'kept' : cerebo_coronary_selector.get_support()}))
+#x = cerebo_coronary.drop(columns=['TenYearCHD'])
+#cerebo_coronary_scores, _ = chi2(x, cerebo_coronary['TenYearCHD'])
+#sns.barplot(x = x.columns, y = cerebo_coronary_scores)
+#plt.show()
 
 # Age, Sex, Smoker, Tobacco, BPMeds, Diabetes, Cholesterol, Blood Pressure, Heart Rate, BMI, Label (Glucose maybe?)
 final_cerebo_coronary = pd.DataFrame(columns=['age', 'sex', 'smoker', 'tobacco', 'blood_pressure_meds', 'diabetes', 'cholesterol', 'blood_pressure', 'heart_rate', 'bmi', 'label'])
@@ -122,10 +121,10 @@ final_cerebo = final_cerebo_coronary.drop(final_cerebo_coronary[final_cerebo_cor
 arterial['cp'] = arterial['cp'].map(normalize)
 arterial['num'] = arterial['num'].map(normalize)
 
-arterial_selector = SelectKBest(chi2, k=7)
-arterial_selector.fit(arterial.drop(columns=['num']), arterial['num'])
-best_arterial = arterial_selector.transform(arterial.drop(columns=['num']))
-print(pd.DataFrame({'columns' : arterial.drop(columns=['num']).columns, 'kept' : arterial_selector.get_support()}))
+#x = arterial.drop(columns=['num'])
+#arterial_scores, _ = chi2(x, arterial['num'])
+#sns.barplot(x = x.columns, y = arterial_scores)
+#plt.show()
 
 
 # Age, Sex, Chest Pain, Blood Pressure, Cholesterol, Blood Sugar, Heart Rate, Label

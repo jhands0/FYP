@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import joblib as jl
 from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
 
-
+'''
 health_art_record = pd.read_csv("datasets/arterial.csv")
 health_art_X = health_art_record.drop(columns=['Unnamed: 0', 'label'])
 health_art_y = health_art_record['label']
@@ -28,6 +28,10 @@ art_cor_y = art_cor_record['label']
 cere_cor_record = pd.read_csv("datasets/classifier_cerebo_coronary.csv")
 cere_cor_X = cere_cor_record.drop(columns=['Unnamed: 0', 'label'])
 cere_cor_y = cere_cor_record['label']
+'''
+
+combined_x = pd.read_csv("datasets/fake_data_X.csv")
+combined_y = pd.read_csv("datasets/fake_data_y.csv")
 
 # Loading models
 
@@ -127,107 +131,157 @@ art_cor_models = {
     "Random Forest" : rf_art_cor
 }
 
-# Predicting and Scoring
+def formatResultsArt(value):
+        if value == 1:
+            return "Arterial Disease"
+        elif value == 2:
+            return "Cerebovascular Disease"
+    
+    def formatResultsCor(value):
+        if value == 1:
+            return "Coronary Heart Disease"
+        elif value == 2:
+            return "Cerebovasular Disease"
 
-combined_y_real = [*health_art_y, *health_cere_y, *health_cor_y, *art_cere_y, *cere_cor_y, *art_cor_y]
+for _, patient in combined_x.iterrows():
 
-svm_results = []
-knn_results = []
-gnb_results = []
-dt_results = []
-lr_results = []
-rf_results = []
+    '''
+    record = pd.DataFrame({
+        "age" : [patient.age], 
+        "sex" : [patient.sex], 
+        "smoker" : [patient.smoker], 
+        "tobacco" : [patient.tobacco], 
+        "blood_pressure" : [patient.blood_pressure], 
+        "blood_pressure_meds" : [patient.blood_pressure_meds], 
+        "diabetes" : [patient.diabetes], 
+        "cholesterol" : [patient.cholesterol], 
+        "heart_rate" : [patient.heart_rate], 
+        "chest_pain" : [patient.chest_pain], 
+        "family_history" : [patient.family_history], 
+        "bmi" : [patient.bmi], 
+        "alcohol" : [patient.alcohol]
+    })
+    '''
 
-for key, value in health_art_models.items():
-    predicted = value.predict(health_art_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    health_art_record = pd.DataFrame({
+        "age" : patient['age'],
+        "sex" : patient['sex'],
+        "chest_pain" : patient['chest_pain'],
+        "blood_pressure" : patient['blood_pressure'],
+        "cholesterol" : patient['cholesterol'],
+        "heart_rate" : patient['heart_rate']
+    })
 
-for key, value in health_cere_models.items():
-    predicted = value.predict(health_cere_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    health_cere_record = pd.DataFrame({
+        "age" : patient['age'], 
+        "sex" : patient['sex'], 
+        "smoker" : patient['smoker'], 
+        "tobacco" : patient['tobacco'], 
+        "blood_pressure_meds" : patient['blood_pressure_meds'], 
+        "diabetes" : patient['diabetes'], 
+        "cholesterol" : patient['cholesterol'], 
+        "blood_pressure" : patient['blood_pressure'], 
+        "heart_rate" : patient['heart_rate'], 
+        "bmi" : patient['bmi']
+    })
 
-for key, value in health_cor_models.items():
-    predicted = value.predict(health_cor_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    health_cor_record = pd.DataFrame({
+        "age" : patient['age'], 
+        "smoker" : patient['smoker'], 
+        "tobacco" : patient['tobacco'], 
+        "blood_pressure" : patient['blood_pressure'], 
+        "cholesterol" : patient['cholesterol'],
+        "family_history" : patient['family_history'], 
+        "bmi" : patient['bmi'], 
+        "alcohol" : patient['alcohol']
+    })
 
-for key, value in art_cere_models.items():
-    predicted = value.predict(art_cere_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    art_cere_cor_record = pd.DataFrame({
+        "age" : patient['age'], 
+        "sex" : patient['sex'], 
+        "blood_pressure" : patient['blood_pressure'], 
+        "cholesterol" : patient['cholesterol'], 
+        "heart_rate" : patient['heart_rate']
+    })
 
-for key, value in cere_cor_models.items():
-    predicted = value.predict(cere_cor_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    cere_cor_record = pd.DataFrame({
+        "age" : patient['age'], 
+        "smoker" : patient['smoker'], 
+        "tobacco" : patient['tobacco'], 
+        "blood_pressure" : patient['blood_pressure'], 
+        "bmi" : patient['bmi']
+    })
 
-for key, value in art_cor_models.items():
-    predicted = value.predict(art_cor_X)
-    if key == "Support Vector Machine":
-        svm_results = [*svm_results, *predicted]
-    elif key == "K-Neighbor":
-        knn_results = [*knn_results, *predicted]
-    elif key == "Gaussian Naive Bayes":
-        gnb_results = [*gnb_results, *predicted]
-    elif key == "Decision Tree":
-        dt_results = [*dt_results, *predicted]
-    elif key == "Logistic Regression":
-        lr_results = [*lr_results, *predicted]
-    elif key == "Random Forest":
-        rf_results = [*rf_results, *predicted]
+    health_art_results = []
+    health_cere_results = []
+    health_cor_results = []
 
+    for key, value in health_art_models.items():
+        result = int(value.predict(health_art_record))
+        health_art_results.append(result)
+
+    for key, value in health_cere_models.items():
+        result = int(value.predict(health_cere_record))
+        health_cere_results.append(result)
+
+    for key, value in health_cor_models.items():
+        result = int(value.predict(health_cor_record))
+        health_cor_results.append(result)
+
+    print(health_art_results)
+    print(health_cere_results)
+    print(health_cor_results)
+
+    if sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) < 4:
+        print("You are predicted healthy")
+
+    elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) < 4:
+        print("The classifier has predicted that you may have arterial disease")
+
+    elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
+        print("The classifier has predicted that you may have cerebovasular disease")
+
+    elif sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
+        print("The classifier has predicted that you may have coronary heart disease")
+
+    elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
+
+        art_cere_results = []
+
+        for key, value in art_cere_models.items():
+            result = int(value.predict(art_cere_cor_record))
+            art_cere_results.append(result)
+
+        print("\n")
+        #art_cere_results = art_cere_results.map(formatResultsArt)
+        print(art_cere_results)
+
+    elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 4:
+
+        cere_cor_results = []
+
+        for key, value in cere_cor_models.items():
+            result = int(value.predict(cere_cor_record))
+            cere_cor_results.append(result)
+
+        print("\n")
+        #cere_cor_results = cere_cor_results.map(formatResultsCor)
+        print(cere_cor_results)
+
+    elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
+
+
+        art_cor_results = []
+
+        for key, value in art_cor_models.items():
+            result = int(value.predict(art_cere_cor_record))
+            art_cor_results.append(result)
+
+        print("\n")
+        #cere_cor_results = cere_cor_results.map(formatResultsCor)
+        print(art_cor_results)
+
+'''
 final_results = {
     "svm" : svm_results,
     "knn" : knn_results, 
@@ -248,3 +302,4 @@ for key, value in final_results.items():
     print(f"Accuracy score for {key} is {acc * 100}")
     #print(f"Precision score for {key} is {pre * 100}")
     #print(f"Recall score for {key} is {rec * 100}")
+'''
