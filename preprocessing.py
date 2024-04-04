@@ -84,12 +84,11 @@ coronary['alcohol'] = coronary['alcohol'].map(normalize)
 #plt.show()
 
 # Age, Smoker, Tobacco, Blood Pressure, Family History, BMI, Alcohol, Label
-final_coronary = pd.DataFrame(columns=['age', 'smoker', 'tobacco', 'blood_pressure', 'cholesterol', 'family_history', 'bmi', 'alcohol', 'label'])
+final_coronary = pd.DataFrame(columns=['age', 'smoker', 'tobacco', 'blood_pressure', 'family_history', 'bmi', 'alcohol', 'label'])
 final_coronary['age'] = coronary['age']
 final_coronary['smoker'] = coronary['smoker']
 final_coronary['tobacco'] = coronary['tobacco']
 final_coronary['blood_pressure'] = coronary['sbp']
-final_coronary['cholesterol'] = coronary['ldl']
 final_coronary['family_history'] = coronary['famhist']
 final_coronary['bmi'] = coronary['obesity']
 final_coronary['alcohol'] = coronary['alcohol']
@@ -173,15 +172,14 @@ plt.show()
 #plt.show()
 
 # Age, Sex, Blood Pressure, Cholesterol, Heart Rate, Label
-classifier_arterial_coronary = pd.DataFrame(columns=['age', 'sex', 'blood_pressure', 'cholesterol', 'heart_rate', 'label'])
+classifier_arterial_coronary = pd.DataFrame(columns=['age', 'sex', 'blood_pressure', 'heart_rate', 'label'])
 true_arterial = final_arterial.drop(final_arterial[final_arterial.label < 1].index)
 true_coronary = final_cerebo_coronary.drop(final_cerebo_coronary[final_cerebo_coronary.label == 2].index)
 true_coronary = true_coronary.drop(true_coronary[true_coronary.label == 0].index)
-true_coronary['label'] = true_coronary['label'].map(oneToTwo)
 classifier_arterial_coronary = pd.concat([true_arterial, true_coronary], join="inner")
 
 # Age, Smoker, Tobacco, Blood Pressure, BMI, Label
-classifier_cerebo_coronary = pd.DataFrame(columns=['age', 'tobacco', 'cholesterol', 'blood_pressure', 'bmi', 'label'])
+classifier_cerebo_coronary = pd.DataFrame(columns=['age', 'tobacco', 'blood_pressure', 'bmi', 'label'])
 true_coronary = final_coronary.drop(final_coronary[final_coronary.label < 1].index)
 true_cerebo_coronary = final_cerebo_coronary.drop(final_cerebo_coronary[final_cerebo_coronary.label < 1].index)
 classifier_cerebo_coronary = pd.concat([true_coronary, true_cerebo_coronary], join="inner")

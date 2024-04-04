@@ -75,11 +75,17 @@ for name, model in models.items():
 
 
 results = ann.evaluate(X_ann_test, y_ann_test, batch_size=64, verbose=0)
-score = results[1]
-print(f"Accuracy score for artifical_neural_network is {score * 100}")
+acc = results[1]
+print(f"Accuracy score for artifical_neural_network is {acc * 100}")
 
 predictions = ann.predict(X_ann_test, batch_size=64, verbose=0)
 predictions = np.where(predictions > 0.5, 1, 0)
+prec = precision_score(y_ann_test, predictions, pos_label=1)
+rec = recall_score(y_ann_test, predictions, pos_label=1)
+f1 = f1_score(y_ann_test, predictions, pos_label=1)
+print(f"Precison score for artificial_neural_network is {prec * 100}")
+print(f"Recall score for artifical_neural_network is {rec * 100}")
+print(f"f1 score for artificial_neural_network is {f1 * 100}")
 cm = confusion_matrix(y_ann_test, predictions)
 plt.figure(figsize=(10, 7))
 cm_plot = sns.heatmap(cm, annot=True)

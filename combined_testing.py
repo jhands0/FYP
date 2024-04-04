@@ -132,16 +132,18 @@ art_cor_models = {
 }
 
 def formatResultsArt(value):
-        if value == 1:
-            return "Arterial Disease"
-        elif value == 2:
-            return "Cerebovascular Disease"
+    if value == 1:
+        return "Arterial Disease"
+    elif value == 2:
+        return "Cerebovascular Disease"
     
-    def formatResultsCor(value):
-        if value == 1:
-            return "Coronary Heart Disease"
-        elif value == 2:
-            return "Cerebovasular Disease"
+def formatResultsCor(value):
+    if value == 1:
+        return "Coronary Heart Disease"
+    elif value == 2:
+        return "Cerebovasular Disease"
+
+pred_list = []
 
 for _, patient in combined_x.iterrows():
 
@@ -164,52 +166,51 @@ for _, patient in combined_x.iterrows():
     '''
 
     health_art_record = pd.DataFrame({
-        "age" : patient['age'],
-        "sex" : patient['sex'],
-        "chest_pain" : patient['chest_pain'],
-        "blood_pressure" : patient['blood_pressure'],
-        "cholesterol" : patient['cholesterol'],
-        "heart_rate" : patient['heart_rate']
+        "age" : [patient['age']],
+        "sex" : [patient['sex']],
+        "chest_pain" : [patient['chest_pain']],
+        "blood_pressure" : [patient['blood_pressure']],
+        "cholesterol" : [patient['cholesterol']],
+        "heart_rate" : [patient['heart_rate']]
     })
 
     health_cere_record = pd.DataFrame({
-        "age" : patient['age'], 
-        "sex" : patient['sex'], 
-        "smoker" : patient['smoker'], 
-        "tobacco" : patient['tobacco'], 
-        "blood_pressure_meds" : patient['blood_pressure_meds'], 
-        "diabetes" : patient['diabetes'], 
-        "cholesterol" : patient['cholesterol'], 
-        "blood_pressure" : patient['blood_pressure'], 
-        "heart_rate" : patient['heart_rate'], 
-        "bmi" : patient['bmi']
+        "age" : [patient['age']], 
+        "sex" : [patient['sex']], 
+        "smoker" : [patient['smoker']], 
+        "tobacco" : [patient['tobacco']], 
+        "blood_pressure_meds" : [patient['blood_pressure_meds']], 
+        "diabetes" : [patient['diabetes']], 
+        "cholesterol" : [patient['cholesterol']], 
+        "blood_pressure" : [patient['blood_pressure']], 
+        "heart_rate" : [patient['heart_rate']], 
+        "bmi" : [patient['bmi']]
     })
 
     health_cor_record = pd.DataFrame({
-        "age" : patient['age'], 
-        "smoker" : patient['smoker'], 
-        "tobacco" : patient['tobacco'], 
-        "blood_pressure" : patient['blood_pressure'], 
-        "cholesterol" : patient['cholesterol'],
-        "family_history" : patient['family_history'], 
-        "bmi" : patient['bmi'], 
-        "alcohol" : patient['alcohol']
+        "age" : [patient['age']], 
+        "smoker" : [patient['smoker']], 
+        "tobacco" : [patient['tobacco']], 
+        "blood_pressure" : [patient['blood_pressure']], 
+        "family_history" : [patient['family_history']], 
+        "bmi" : [patient['bmi']], 
+        "alcohol" : [patient['alcohol']]
     })
 
     art_cere_cor_record = pd.DataFrame({
-        "age" : patient['age'], 
-        "sex" : patient['sex'], 
-        "blood_pressure" : patient['blood_pressure'], 
-        "cholesterol" : patient['cholesterol'], 
-        "heart_rate" : patient['heart_rate']
+        "age" : [patient['age']], 
+        "sex" : [patient['sex']], 
+        "blood_pressure" : [patient['blood_pressure']], 
+        "cholesterol" : [patient['cholesterol']], 
+        "heart_rate" : [patient['heart_rate']]
     })
 
     cere_cor_record = pd.DataFrame({
-        "age" : patient['age'], 
-        "smoker" : patient['smoker'], 
-        "tobacco" : patient['tobacco'], 
-        "blood_pressure" : patient['blood_pressure'], 
-        "bmi" : patient['bmi']
+        "age" : [patient['age']], 
+        "smoker" : [patient['smoker']], 
+        "tobacco" : [patient['tobacco']], 
+        "blood_pressure" : [patient['blood_pressure']], 
+        "bmi" : [patient['bmi']]
     })
 
     health_art_results = []
@@ -228,23 +229,27 @@ for _, patient in combined_x.iterrows():
         result = int(value.predict(health_cor_record))
         health_cor_results.append(result)
 
-    print(health_art_results)
-    print(health_cere_results)
-    print(health_cor_results)
+    #print(health_art_results)
+    #print(health_cere_results)
+    #print(health_cor_results)
 
-    if sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) < 4:
-        print("You are predicted healthy")
+    if sum(health_art_results) < 15 and sum(health_cere_results) < 10 and sum(health_cor_results) < 5:
+        #print("You are predicted healthy")
+        pred_list.append(0)
 
-    elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) < 4:
-        print("The classifier has predicted that you may have arterial disease")
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 10 and sum(health_cor_results) < 5:
+        #print("The classifier has predicted that you may have arterial disease")
+        pred_list.append(3)
 
-    elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
-        print("The classifier has predicted that you may have cerebovasular disease")
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) < 5:
+        #print("The classifier has predicted that you may have cerebovasular disease")
+        pred_list.append(2)
 
-    elif sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
-        print("The classifier has predicted that you may have coronary heart disease")
+    elif sum(health_art_results) < 15 and sum(health_cere_results) < 10 and sum(health_cor_results) >= 5:
+        #print("The classifier has predicted that you may have coronary heart disease")
+        pred_list.append(1)
 
-    elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) < 5:
 
         art_cere_results = []
 
@@ -252,11 +257,17 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(art_cere_cor_record))
             art_cere_results.append(result)
 
-        print("\n")
-        #art_cere_results = art_cere_results.map(formatResultsArt)
-        print(art_cere_results)
+        if art_cere_results.count(2) > art_cere_results.count(3):
+            pred_list.append(2)
 
-    elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 4:
+        else:
+            pred_list.append(3)
+
+        #print("\n")
+        #art_cere_results = art_cere_results.map(formatResultsArt)
+        #print(art_cere_results)
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) >= 5:
 
         cere_cor_results = []
 
@@ -264,11 +275,17 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(cere_cor_record))
             cere_cor_results.append(result)
 
-        print("\n")
-        #cere_cor_results = cere_cor_results.map(formatResultsCor)
-        print(cere_cor_results)
+        if cere_cor_results.count(2) > cere_cor_results.count(1):
+            pred_list.append(2)
 
-    elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
+        else:
+            pred_list.append(1)
+
+        #print("\n")
+        #cere_cor_results = cere_cor_results.map(formatResultsCor)
+        #print(cere_cor_results)
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 10 and sum(health_cor_results) >= 5:
 
 
         art_cor_results = []
@@ -277,9 +294,22 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(art_cere_cor_record))
             art_cor_results.append(result)
 
-        print("\n")
+        if art_cor_results.count(1) > art_cor_results.count(3):
+            pred_list.append(1)
+
+        else:
+            pred_list.append(3)
+
+        #print("\n")
         #cere_cor_results = cere_cor_results.map(formatResultsCor)
-        print(art_cor_results)
+        #print(art_cor_results)
+
+print(f'healthy: predicted = {pred_list.count(0)}')
+print(f'coronary: predicted = {pred_list.count(1)}')
+print(f'cerebovascular: predicted = {pred_list.count(2)}')
+print(f'arterial: predicted = {pred_list.count(3)}')
+
+#real = {(combined_y == 1).sum()}
 
 '''
 final_results = {
