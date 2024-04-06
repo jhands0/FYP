@@ -53,6 +53,8 @@ le = LabelEncoder()
 le.fit(y)
 y_ann = le.transform(y)
 
+jl.dump(value=sc, filename=f"models/{args.folder}/ann_scaler.pkl")
+
 # Cross Validation and Oversampling
 
 kf = KFold(n_splits=5, shuffle=True, random_state=101)

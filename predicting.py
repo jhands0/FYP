@@ -82,8 +82,7 @@ record = pd.DataFrame({
     "chest_pain" : [chest_pain], 
     "family_history" : [fam_hist], 
     "bmi" : [bmi], 
-    "alcohol" : [alcohol], 
-    "blood_sugar" : [bs]
+    "alcohol" : [alcohol]
 })
 
 health_art_record = pd.DataFrame({
@@ -92,7 +91,6 @@ health_art_record = pd.DataFrame({
     "chest_pain" : [chest_pain],
     "blood_pressure" : [bp],
     "cholesterol" : [chol],
-    "blood_sugar" : [bs],
     "heart_rate" : [heart_rate]
 })
 

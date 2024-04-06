@@ -233,23 +233,23 @@ for _, patient in combined_x.iterrows():
     #print(health_cere_results)
     #print(health_cor_results)
 
-    if sum(health_art_results) < 15 and sum(health_cere_results) < 10 and sum(health_cor_results) < 5:
+    if sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 6:
         #print("You are predicted healthy")
         pred_list.append(0)
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 10 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 6:
         #print("The classifier has predicted that you may have arterial disease")
         pred_list.append(3)
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 6:
         #print("The classifier has predicted that you may have cerebovasular disease")
         pred_list.append(2)
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) < 10 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 6:
         #print("The classifier has predicted that you may have coronary heart disease")
         pred_list.append(1)
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 6:
 
         art_cere_results = []
 
@@ -267,7 +267,7 @@ for _, patient in combined_x.iterrows():
         #art_cere_results = art_cere_results.map(formatResultsArt)
         #print(art_cere_results)
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 10 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 6:
 
         cere_cor_results = []
 
@@ -285,7 +285,7 @@ for _, patient in combined_x.iterrows():
         #cere_cor_results = cere_cor_results.map(formatResultsCor)
         #print(cere_cor_results)
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 10 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 6:
 
 
         art_cor_results = []

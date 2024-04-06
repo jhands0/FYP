@@ -9,12 +9,17 @@ from sklearn.model_selection import train_test_split, KFold # Splitting dataset
 from sklearn.feature_selection import SelectKBest, chi2 # Feature Selection
 from imblearn.over_sampling import SMOTE # SMOTE
 
-# Library to fetch dataset
-
 coronary = pd.read_csv("datasets/CHDdata.csv")
 cerebo_coronary = pd.read_csv("datasets/CHD_preprocessed.csv")
 arterial = pd.read_csv("datasets/HeartDisease.csv")
 arterial = arterial.drop(columns=['Unnamed: 0'])
+
+#sns.histplot(coronary, x="chd")
+#plt.show()
+#sns.histplot(cerebo_coronary, x="TenYearCHD")
+#plt.show()
+#sns.histplot(arterial, x="num")
+#plt.show()
 
 # EDA
 '''
@@ -68,9 +73,12 @@ def convertDaytoWeek(value):
 def oneToTwo(value):
     return 2
 
+def max_to_active(value):
+    return value * 0.77
+
 # Age, Sex, Smoker, Tobacco, BPMeds, Diabetes, Cholestrol, Blood Pressure, Heart Rate, BMI, Label (Glucose maybe?)
-cerebo_coronary.loc[cerebo_coronary['prevalentStroke'] == 1, 'TenYearCHD'] = 2
-cerebo_coronary.loc[cerebo_coronary['prevalentHyp'] == 1, 'TenYearCHD'] = 2
+cerebo_coronary.loc[((cerebo_coronary.prevalentStroke == 1) & (cerebo_coronary.TenYearCHD == 1)), 'TenYearCHD'] = 2
+cerebo_coronary.loc[((cerebo_coronary.prevalentHyp == 1) & (cerebo_coronary.TenYearCHD == 1)), 'TenYearCHD'] = 2
 
 coronary['smoker'] = 0
 coronary['smoker'] = coronary['tobacco'].map(normalize)
@@ -93,6 +101,10 @@ final_coronary['family_history'] = coronary['famhist']
 final_coronary['bmi'] = coronary['obesity']
 final_coronary['alcohol'] = coronary['alcohol']
 final_coronary['label'] = coronary['chd']
+
+final_coronary_corr = final_coronary.corr()
+sns.heatmap(final_coronary_corr)
+plt.show()
 
 cerebo_coronary['cigsPerDay'] = cerebo_coronary['cigsPerDay'].map(convertDaytoWeek)
 
@@ -117,7 +129,12 @@ final_cerebo_coronary['label'] = cerebo_coronary['TenYearCHD']
 
 final_cerebo = final_cerebo_coronary.drop(final_cerebo_coronary[final_cerebo_coronary.label == 1].index)
 
+final_cerebo_corr = final_cerebo.corr()
+sns.heatmap(final_cerebo_corr)
+plt.show()
+
 arterial['cp'] = arterial['cp'].map(normalize)
+arterial['thalach'] = arterial['thalach'].map(max_to_active)
 arterial['num'] = arterial['num'].map(normalize)
 
 #x = arterial.drop(columns=['num'])
@@ -138,11 +155,22 @@ final_arterial['label'] = arterial['num']
 
 final_arterial.loc[final_arterial['label'] == 1, 'label'] = 3
 
+final_arterial_corr = final_arterial.corr()
+sns.heatmap(final_arterial_corr)
+plt.show()
+
 # Saving preprocessed datasets
 
 final_coronary.to_csv("datasets/coronary.csv")
 final_cerebo.to_csv("datasets/cerebo_coronary.csv")
 final_arterial.to_csv("datasets/arterial.csv")
+
+sns.histplot(final_coronary, x="label")
+plt.show()
+sns.histplot(final_cerebo, x="label")
+plt.show()
+sns.histplot(final_arterial, x="label")
+plt.show()
 
 '''
 visualise_df = pd.DataFrame()
@@ -156,20 +184,6 @@ visualise_df_smote['x'], visualise_df_smote['y'] = sm.fit_resample(visualise_df[
 sns.histplot(visualise_df_smote['y'])
 plt.show()
 '''
-
-#sns.histplot(final_coronary['label'])
-#plt.show()
-#sns.histplot(final_cerebo['label'])
-#plt.show()
-#sns.histplot(final_arterial['label'])
-#plt.show()
-
-#sns.heatmap(final_coronary.corr(numeric_only=True))
-#plt.show()
-#sns.heatmap(final_cerebo.corr(numeric_only=True))
-#plt.show()
-#sns.heatmap(final_arterial.corr(numeric_only=True))
-#plt.show()
 
 # Age, Sex, Blood Pressure, Cholesterol, Heart Rate, Label
 classifier_arterial_coronary = pd.DataFrame(columns=['age', 'sex', 'blood_pressure', 'heart_rate', 'label'])
