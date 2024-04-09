@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
@@ -68,6 +68,7 @@ for name, model in models.items():
     print(f"Precison score for {name} is {prec * 100}")
     print(f"Recall score for {name} is {rec * 100}")
     print(f"f1 score for {name} is {f1 * 100}")
+    #acc, prec, rec, f1 = cross_validate(model, X_test, y_test, scoring=('accuracy', 'precision', 'recall', 'f1'), cv=4)
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(10, 7))
     cm_plot = sns.heatmap(cm, annot=True)
@@ -80,6 +81,7 @@ print(f"Accuracy score for artifical_neural_network is {acc * 100}")
 
 predictions = ann.predict(X_ann_test, batch_size=64, verbose=0)
 predictions = np.where(predictions > 0.5, 1, 0)
+#acc, prec, rec, f1 = cross_validate(ann, X_ann_test, y_ann_test, scoring=('accuracy', 'precision', 'recall', 'f1'), cv=4)
 prec = precision_score(y_ann_test, predictions, pos_label=1)
 rec = recall_score(y_ann_test, predictions, pos_label=1)
 f1 = f1_score(y_ann_test, predictions, pos_label=1)

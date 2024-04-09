@@ -1,11 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from sklearn.preprocessing import LabelEncoder
+import numpy as np
+
 import pandas as pd
 import joblib as jl
 
 def y_or_n_to_num(value):
-    if value == "y":
+    if value == "yes":
         return 1
     elif value == "male":
         return 1
@@ -13,23 +16,24 @@ def y_or_n_to_num(value):
         return 0
 
 def preprocess(record):
-    age = record[0]
-    sex = y_or_n_to_num(record[1])
-    bmi = record[3] / record[2] ** 2
-    chest_pain = y_or_n_to_num(record[4])
-    smoker = y_or_n_to_num(record[5])
-    tobacco = record[6]
-    alcohol = y_or_n_to_num(record[7])
-    diabetes = y_or_n_to_num(record[8])
-    fam_hist = y_or_n_to_num(record[9])
-    bp_meds = y_or_n_to_num(record[10])
-    bp = record[11]
-    heart_rate = record[12]
-    chol = record[13]
+    age = record[0].get()
+    sex = y_or_n_to_num(record[1].get())
+    height = float(record[2].get())
+    weight = int(record[3].get())
+    bmi = weight / height ** 2
+    smoker = y_or_n_to_num(record[4].get())
+    tobacco = record[5].get()
+    alcohol = y_or_n_to_num(record[6].get())
+    diabetes = y_or_n_to_num(record[7].get())
+    fam_hist = y_or_n_to_num(record[8].get())
+    bp_meds = y_or_n_to_num(record[9].get())
+    bp = record[10].get()
+    heart_rate = record[11].get()
+    chol = record[12].get()
 
-    return [age, sex, bmi, chest_pain, smoker, tobacco, alcohol, diabetes, fam_hist, bp_meds, bp, heart_rate, chol]
+    return [age, sex, bmi, smoker, tobacco, alcohol, diabetes, fam_hist, bp_meds, bp, heart_rate, chol]
 
-def get_results(record1, record2):
+def get_results(record):
     ann_health_art = jl.load("models/healthy-arterial/artificial_neural_network.pkl")
     dt_health_art = jl.load("models/healthy-arterial/decision_tree.pkl")
     gnb_health_art = jl.load("models/healthy-arterial/gaussian_naive_bayes.pkl")
@@ -47,7 +51,7 @@ def get_results(record1, record2):
         "Random Forest" : rf_health_art
     }
 
-    ann_health_cere = jl.load("models/healthy_cerebo/artificial_neural_network.pkl")
+    ann_health_cere = jl.load("models/healthy-cerebo/artificial_neural_network.pkl")
     dt_health_cere = jl.load("models/healthy-cerebo/decision_tree.pkl")
     gnb_health_cere = jl.load("models/healthy-cerebo/gaussian_naive_bayes.pkl")
     knn_health_cere = jl.load("models/healthy-cerebo/k_neighbor.pkl")
@@ -135,39 +139,44 @@ def get_results(record1, record2):
     health_art_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
-        "chest_pain" : [record[3]],
-        "blood_pressure" : [record[10]],
-        "cholesterol" : [record[12]],
-        "heart_rate" : [record[11]]
+        "blood_pressure" : [record[9]],
+        "cholesterol" : [record[11]],
+        "heart_rate" : [record[10]]
     })
 
     health_art_scaler = jl.load("models/healthy-arterial/ann_scaler.pkl")
     health_art_ann_record = health_art_scaler.transform(health_art_record)
 
+    health_art_le = LabelEncoder()
+    health_art_le.fit([0, 3])
+
     health_cere_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
-        "smoker" : [record[4]], 
-        "tobacco" : [record[5]], 
-        "blood_pressure_meds" : [record[9]], 
-        "diabetes" : [record[7]], 
-        "cholesterol" : [record[12]],
-        "blood_pressure" : [record[10]],
-        "heart_rate" : [record[11]],
+        "smoker" : [record[3]], 
+        "tobacco" : [record[4]], 
+        "blood_pressure_meds" : [record[8]], 
+        "diabetes" : [record[6]], 
+        "cholesterol" : [record[11]],
+        "blood_pressure" : [record[9]],
+        "heart_rate" : [record[10]],
         "bmi" : [record[2]]
     })
 
     health_cere_scaler = jl.load("models/healthy-cerebo/ann_scaler.pkl")
     health_cere_ann_record = health_cere_scaler.transform(health_cere_record)
 
+    health_cere_le = LabelEncoder()
+    health_cere_le.fit([0, 2])
+
     health_cor_record = pd.DataFrame({
         "age" : [record[0]],
-        "smoker" : [record[4]], 
-        "tobacco" : [record[5]], 
-        "blood_pressure" : [record[10]],
-        "family_history" : [record[8]], 
+        "smoker" : [record[3]], 
+        "tobacco" : [record[4]], 
+        "blood_pressure" : [record[9]],
+        "family_history" : [record[7]], 
         "bmi" : [record[2]], 
-        "alcohol" : [record[6]]
+        "alcohol" : [record[5]]
     })
 
     health_cor_scaler = jl.load("models/healthy-coronary/ann_scaler.pkl")
@@ -176,27 +185,36 @@ def get_results(record1, record2):
     art_cere_cor_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
-        "blood_pressure" : [record[10]],
-        "cholesterol" : [record[12]],
-        "heart_rate" : [record[11]]
+        "blood_pressure" : [record[9]],
+        "cholesterol" : [record[11]],
+        "heart_rate" : [record[10]]
     })
 
     art_cere_scaler = jl.load("models/arterial-cerebo/ann_scaler.pkl")
     art_cere_ann_record = art_cere_scaler.transform(art_cere_cor_record)
 
+    art_cere_le = LabelEncoder()
+    art_cere_le.fit([2, 3])
+
     art_cor_scaler = jl.load("models/arterial-coronary/ann_scaler.pkl")
     art_cor_ann_record = art_cor_scaler.transform(art_cere_cor_record)
 
+    art_cor_le = LabelEncoder()
+    art_cor_le.fit([1, 3])
+
     cere_cor_record = pd.DataFrame({
         "age" : [record[0]],
-        "smoker" : [record[4]], 
-        "tobacco" : [record[5]], 
-        "blood_pressure" : [record[10]],
+        "smoker" : [record[3]], 
+        "tobacco" : [record[4]], 
+        "blood_pressure" : [record[9]],
         "bmi" : [record[2]]
     })
 
     cere_cor_scaler = jl.load("models/cerebo-coronary/ann_scaler.pkl")
     cere_cor_ann_record = cere_cor_scaler.transform(cere_cor_record)
+
+    cere_cor_le = LabelEncoder()
+    cere_cor_le.fit([1, 2])
 
     health_art_results = []
     health_cere_results = []
@@ -206,48 +224,160 @@ def get_results(record1, record2):
         result = int(value.predict(health_art_record))
         health_art_results.append(result)
 
+    result = ann_health_art.predict(health_art_ann_record)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    result = health_art_le.inverse_transform(result)
+    health_art_results.append(result)
+
     for key, value in health_cere_models.items():
         result = int(value.predict(health_cere_record))
         health_cere_results.append(result)
+
+    result = ann_health_cere.predict(health_cere_ann_record)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    result = health_cere_le.inverse_transform(result)
+    health_cere_results.append(result)
 
     for key, value in health_cor_models.items():
         result = int(value.predict(health_cor_record))
         health_cor_results.append(result)
 
+    result = ann_health_cor.predict(health_cor_ann_record)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    #result = health_cor_le.inverse_transform(result)
+    health_cor_results.append(result)
+
+    if sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
+        art_percent = health_art_results.count(3) / 7
+        cere_percent = health_cere_results.count(2) / 7
+        cor_percent = health_cor_results.count(1) / 7
+        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
+        art_percent = health_art_results.count(3) / 7
+        cere_percent = health_cere_results.count(2) / 7
+        cor_percent = health_cor_results.count(1) / 7
+        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
+        art_percent = health_art_results.count(3) / 7
+        cere_percent = health_cere_results.count(2) / 7
+        cor_percent = health_cor_results.count(1) / 7
+        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
+        art_percent = health_art_results.count(3) / 7
+        cere_percent = health_cere_results.count(2) / 7
+        cor_percent = health_cor_results.count(1) / 7
+        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
+
+        art_cere_results = []
+
+        for key, value in art_cere_models.items():
+            result = int(value.predict(art_cere_cor_record))
+            art_cere_results.append(result)
+
+        result = ann_art_cere.predict(art_cere_ann_record)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = art_cere_le.inverse_transform(result)
+        art_cere_results.append(result)
+
+        if art_cere_results.count(2) >= art_cere_results.count(3):
+            print("The classifier has predicted that you may have cerebovasular disease")
+
+        else:
+            print("The classifier has predicted that you may have arterial disease")
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
+
+        cere_cor_results = []
+
+        for key, value in cere_cor_models.items():
+            result = int(value.predict(cere_cor_record))
+            cere_cor_results.append(result)
+
+        result = ann_cere_cor.predict(cere_cor_ann_record)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = cere_cor_le.inverse_transform(result)
+        art_cere_results.append(result)
+
+        if cere_cor_results.count(2) >= cere_cor_results.count(1):
+            print("The classifier has predicted that you may have cerebovasular disease")
+
+        else:
+            print("The classifier has predicted that you may have coronary heart disease")
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
+
+        art_cor_results = []
+
+        for key, value in art_cor_models.items():
+            result = int(value.predict(art_cere_cor_record))
+            art_cor_results.append(result)
+
+        result = ann_art_cor.predict(art_cor_ann_record)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = art_cor_le.inverse_transform(result)
+        art_cor_results.append(result)
+
+        if art_cor_results.count(3) >= art_cor_results.count(1):
+            print("The classifier has predicted that you may have arterial heart disease")
+
+        else:
+            print("The classifier has predicted that you may have coronary heart disease")
 
 
-def submit():
+    else:
+        print("The classifier has predicted that you may have coronary heart disease")
+        print("The classifier has predicted that you may have cerebovascular disease")
+        print("The classifier has predicted that you may have arterial disease")
+
+    return [healthy_percent * 100, cor_percent * 100, cere_percent * 100, art_percent * 100]
+
+
+def result():
     pre_record = preprocess(entries)
-    ann_pre_record = StandardScaler.fit_transform(pre_record)
-    messagebox.showinfo("Results")
+    healthy, coronary, cerebo, arterial = get_results(pre_record)
+    healthy_message = f"The classifier predicted a {healthy}% chance of you being healthy"
+    coronary_message = f"The classifier predicted a {coronary}% chance of you being at risk of Coronary Heart disease"
+    cerebo_message = f"The classifier predicted a {cerebo}% chance of you being at risk of Cerebovascular disease"
+    arterial_message = f"The classifier predicted a {arterial}% chance of you being at risk of Cerebovascular disease"
+    messagebox.showinfo(title="Results", message=f"{healthy_message}\n{coronary_message}\n{cerebo_message}\n{arterial_message}")
 
 root = tk.Tk()
 root.title("Heart Disease Prediction and Classification")
 
-labels = [
+questions = [
     "What is your age?", 
     "What is your sex?", 
     "What is your height? (in metres)", 
     "What is your weight? (in KG)", 
-    "Do you have any chest pain? (Y/N)", 
     "Do you smoke? (Y/N)", 
     "How many cigarettes do you smoke per week?", 
     "Do you drink alcohol? (Y/N)", 
     "Do you have diabetes? (Y/N)",  
     "Do you have any relatives that have been diagnosed with Cardiovascular Disease? (Y/N)",
     "Do you take any blood pressure medication? (Y/N)",
-    "What is your current blood pressure?",
+    "What is your current systolic blood pressure?",
     "What is your current heart rate?",
     "What is your current cholesterol level?"
     ]
 entries = []
 
-for i, label in enumerate(labels):
-    tk.Label(root, text=label).grid(row=i, column=0)
+for i, question in enumerate(questions):
+    tk.Label(root, text=question).grid(row=i, column=0)
     entries.append(tk.Entry(root))
     entries[-1].grid(row=i, column=1)
 
-tk.Button(root, text="Results", command=result).grid(row=len(labels), column=1)
+tk.Button(root, text="Results", command=result).grid(row=len(questions), column=1)
 
 
 if __name__ == "__main__":

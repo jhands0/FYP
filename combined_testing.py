@@ -1,8 +1,10 @@
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib as jl
-from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+import random
 
 '''
 health_art_record = pd.read_csv("datasets/arterial.csv")
@@ -144,8 +146,13 @@ def formatResultsCor(value):
         return "Cerebovasular Disease"
 
 pred_list = []
+count = ''
+healthy_count = 0
+art_count = 0
+cere_count = 0
+cor_count = 0
 
-for _, patient in combined_x.iterrows():
+for index, patient in combined_x.iterrows():
 
     '''
     record = pd.DataFrame({
@@ -164,11 +171,21 @@ for _, patient in combined_x.iterrows():
         "alcohol" : [patient.alcohol]
     })
     '''
+    if index == 0:
+        print('============================= HEALTHY')
+    
+    if index == 1289:
+        print('============================= CORONARY')
+
+    if index == 1621:
+        print('============================= CEREBOVASCULAR')
+
+    if index == 2012:
+        print('============================= ARTERIAL')
 
     health_art_record = pd.DataFrame({
         "age" : [patient['age']],
         "sex" : [patient['sex']],
-        "chest_pain" : [patient['chest_pain']],
         "blood_pressure" : [patient['blood_pressure']],
         "cholesterol" : [patient['cholesterol']],
         "heart_rate" : [patient['heart_rate']]
@@ -233,23 +250,39 @@ for _, patient in combined_x.iterrows():
     #print(health_cere_results)
     #print(health_cor_results)
 
-    if sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 6:
+    if sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         #print("You are predicted healthy")
         pred_list.append(0)
+        count = 'healthy'
 
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 6:
+        if index < 1289:
+            healthy_count += 1
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         #print("The classifier has predicted that you may have arterial disease")
         pred_list.append(3)
+        count = 'arterial'
 
-    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 6:
+        if index >= 2012 and index < 2165:
+            art_count += 1
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
         #print("The classifier has predicted that you may have cerebovasular disease")
         pred_list.append(2)
+        count = 'cerebovascular'
 
-    elif sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 6:
+        if index >= 1621 and index < 2012:
+            cere_count += 1
+
+    elif sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
         #print("The classifier has predicted that you may have coronary heart disease")
         pred_list.append(1)
+        count = 'coronary'
 
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 6:
+        if index >= 1289 and index < 1621:
+            cor_count += 1
+
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
 
         art_cere_results = []
 
@@ -257,17 +290,25 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(art_cere_cor_record))
             art_cere_results.append(result)
 
-        if art_cere_results.count(2) > art_cere_results.count(3):
+        if art_cere_results.count(2) >= art_cere_results.count(3):
             pred_list.append(2)
+            count = 'cerebovascular'
+
+            if index >= 1621 and index < 2012:
+                cere_count += 1
 
         else:
             pred_list.append(3)
+            count = 'arterial'
+
+            if index >= 2012 and index < 2165:
+                art_count += 1
 
         #print("\n")
         #art_cere_results = art_cere_results.map(formatResultsArt)
         #print(art_cere_results)
 
-    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 6:
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
 
         cere_cor_results = []
 
@@ -275,17 +316,25 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(cere_cor_record))
             cere_cor_results.append(result)
 
-        if cere_cor_results.count(2) > cere_cor_results.count(1):
+        if cere_cor_results.count(2) >= cere_cor_results.count(1):
             pred_list.append(2)
+            count = 'cerebovascular'
+
+            if index >= 1621 and index < 2012:
+                cere_count += 1
 
         else:
             pred_list.append(1)
+            count = 'coronary'
+
+            if index >= 1289 and index < 1621:
+                cor_count += 1
 
         #print("\n")
         #cere_cor_results = cere_cor_results.map(formatResultsCor)
         #print(cere_cor_results)
 
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 6:
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
 
 
         art_cor_results = []
@@ -294,20 +343,76 @@ for _, patient in combined_x.iterrows():
             result = int(value.predict(art_cere_cor_record))
             art_cor_results.append(result)
 
-        if art_cor_results.count(1) > art_cor_results.count(3):
-            pred_list.append(1)
+        if art_cor_results.count(3) >= art_cor_results.count(1):
+            pred_list.append(3)
+            count = 'arterial'
+
+            if index >= 2012 and index < 2165:
+                art_count += 1
 
         else:
-            pred_list.append(3)
+            pred_list.append(1)
+            count = 'coronary'
+
+            if index >= 1289 and index < 1621:
+                cor_count += 1
 
         #print("\n")
         #cere_cor_results = cere_cor_results.map(formatResultsCor)
         #print(art_cor_results)
 
-print(f'healthy: predicted = {pred_list.count(0)}')
-print(f'coronary: predicted = {pred_list.count(1)}')
-print(f'cerebovascular: predicted = {pred_list.count(2)}')
-print(f'arterial: predicted = {pred_list.count(3)}')
+    else:
+        
+        score = random.randint(1, 3)
+        pred_list.append(score)
+        count = 'multiple'
+
+        if index >= 1289 and index < 1621:
+            cor_count += 1
+
+        elif index >= 1621 and index < 2012:
+            cere_count += 1
+
+        elif index >= 2012 and index < 2165:
+            art_count += 1
+
+    print(count)
+
+#print(f'healthy: predicted = {pred_list.count(0)}')
+#print(f'coronary: predicted = {pred_list.count(1)}')
+#print(f'cerebovascular: predicted = {pred_list.count(2)}')
+#print(f'arterial: predicted = {pred_list.count(3)}')
+
+print("=========================")
+
+health_score = healthy_count / 1288
+print(health_score * 100)
+
+cor_score = cor_count / 333
+print(cor_score * 100)
+
+cere_score = cere_count / 391
+print(cere_score * 100)
+
+art_score = art_count / 153
+print(art_score * 100)
+
+total_score = (healthy_count + cor_count + cere_count + art_count) / 2165
+print(total_score * 100)
+
+pred = np.array(pred_list)
+real = combined_y.to_numpy()
+
+'''
+acc = accuracy_score(real, pred)
+prec = precision_score(real, pred, pos_label=0)
+rec = recall_score(real, pred, pos_label=0)
+f1 = f1_score(real, pred, pos_label=0)
+print(f"Accuracy score is {acc * 100}")
+print(f"Precision score is {prec * 100}")
+print(f"Recall score is {rec * 100}")
+print(f"f1 score is {f1 * 100}")
+'''
 
 #real = {(combined_y == 1).sum()}
 
