@@ -4,6 +4,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib as jl
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.preprocessing import LabelEncoder
+import warnings
+from sklearn.exceptions import DataConversionWarning
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 import random
 
 '''
@@ -37,6 +41,7 @@ combined_y = pd.read_csv("datasets/fake_data_y.csv")
 
 # Loading models
 
+ann_health_art = jl.load("models/healthy-arterial/artificial_neural_network.pkl")
 dt_health_art = jl.load("models/healthy-arterial/decision_tree.pkl")
 gnb_health_art = jl.load("models/healthy-arterial/gaussian_naive_bayes.pkl")
 knn_health_art = jl.load("models/healthy-arterial/k_neighbor.pkl")
@@ -53,6 +58,7 @@ health_art_models = {
     "Random Forest" : rf_health_art
 }
 
+ann_health_cere = jl.load("models/healthy-cerebo/artificial_neural_network.pkl")
 dt_health_cere = jl.load("models/healthy-cerebo/decision_tree.pkl")
 gnb_health_cere = jl.load("models/healthy-cerebo/gaussian_naive_bayes.pkl")
 knn_health_cere = jl.load("models/healthy-cerebo/k_neighbor.pkl")
@@ -69,6 +75,7 @@ health_cere_models = {
     "Random Forest" : rf_health_cere
 }
 
+ann_health_cor = jl.load("models/healthy-coronary/artificial_neural_network.pkl")
 dt_health_cor = jl.load("models/healthy-coronary/decision_tree.pkl")
 gnb_health_cor = jl.load("models/healthy-coronary/gaussian_naive_bayes.pkl")
 knn_health_cor = jl.load("models/healthy-coronary/k_neighbor.pkl")
@@ -85,6 +92,7 @@ health_cor_models = {
     "Random Forest" : rf_health_cor
 }
 
+ann_art_cere = jl.load("models/arterial-cerebo/artificial_neural_network.pkl")
 dt_art_cere = jl.load("models/arterial-cerebo/decision_tree.pkl")
 gnb_art_cere = jl.load("models/arterial-cerebo/gaussian_naive_bayes.pkl")
 knn_art_cere = jl.load("models/arterial-cerebo/k_neighbor.pkl")
@@ -101,6 +109,7 @@ art_cere_models = {
     "Random Forest" : rf_art_cere
 }
 
+ann_cere_cor = jl.load("models/cerebo-coronary/artificial_neural_network.pkl")
 dt_cere_cor = jl.load("models/cerebo-coronary/decision_tree.pkl")
 gnb_cere_cor = jl.load("models/cerebo-coronary/gaussian_naive_bayes.pkl")
 knn_cere_cor = jl.load("models/cerebo-coronary/k_neighbor.pkl")
@@ -117,6 +126,7 @@ cere_cor_models = {
     "Random Forest" : rf_cere_cor
 }
 
+ann_art_cor = jl.load("models/arterial-coronary/artificial_neural_network.pkl")
 dt_art_cor = jl.load("models/arterial-coronary/decision_tree.pkl")
 gnb_art_cor = jl.load("models/arterial-coronary/gaussian_naive_bayes.pkl")
 knn_art_cor = jl.load("models/arterial-coronary/k_neighbor.pkl")
@@ -154,23 +164,6 @@ cor_count = 0
 
 for index, patient in combined_x.iterrows():
 
-    '''
-    record = pd.DataFrame({
-        "age" : [patient.age], 
-        "sex" : [patient.sex], 
-        "smoker" : [patient.smoker], 
-        "tobacco" : [patient.tobacco], 
-        "blood_pressure" : [patient.blood_pressure], 
-        "blood_pressure_meds" : [patient.blood_pressure_meds], 
-        "diabetes" : [patient.diabetes], 
-        "cholesterol" : [patient.cholesterol], 
-        "heart_rate" : [patient.heart_rate], 
-        "chest_pain" : [patient.chest_pain], 
-        "family_history" : [patient.family_history], 
-        "bmi" : [patient.bmi], 
-        "alcohol" : [patient.alcohol]
-    })
-    '''
     if index == 0:
         print('============================= HEALTHY')
     
@@ -191,6 +184,12 @@ for index, patient in combined_x.iterrows():
         "heart_rate" : [patient['heart_rate']]
     })
 
+    health_art_scaler = jl.load("models/healthy-arterial/ann_scaler.pkl")
+    health_art_ann_record = health_art_scaler.transform(health_art_record)
+
+    health_art_le = LabelEncoder()
+    health_art_le.fit([0, 3])
+
     health_cere_record = pd.DataFrame({
         "age" : [patient['age']], 
         "sex" : [patient['sex']], 
@@ -204,6 +203,12 @@ for index, patient in combined_x.iterrows():
         "bmi" : [patient['bmi']]
     })
 
+    health_cere_scaler = jl.load("models/healthy-cerebo/ann_scaler.pkl")
+    health_cere_ann_record = health_cere_scaler.transform(health_cere_record)
+
+    health_cere_le = LabelEncoder()
+    health_cere_le.fit([0, 2])
+
     health_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
         "smoker" : [patient['smoker']], 
@@ -214,6 +219,9 @@ for index, patient in combined_x.iterrows():
         "alcohol" : [patient['alcohol']]
     })
 
+    health_cor_scaler = jl.load("models/healthy-coronary/ann_scaler.pkl")
+    health_cor_ann_record = health_cor_scaler.transform(health_cor_record)
+
     art_cere_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
         "sex" : [patient['sex']], 
@@ -221,6 +229,18 @@ for index, patient in combined_x.iterrows():
         "cholesterol" : [patient['cholesterol']], 
         "heart_rate" : [patient['heart_rate']]
     })
+
+    art_cere_scaler = jl.load("models/arterial-cerebo/ann_scaler.pkl")
+    art_cere_ann_record = art_cere_scaler.transform(art_cere_cor_record)
+
+    art_cere_le = LabelEncoder()
+    art_cere_le.fit([2, 3])
+
+    art_cor_scaler = jl.load("models/arterial-coronary/ann_scaler.pkl")
+    art_cor_ann_record = art_cor_scaler.transform(art_cere_cor_record)
+
+    art_cor_le = LabelEncoder()
+    art_cor_le.fit([1, 3])
 
     cere_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
@@ -230,6 +250,12 @@ for index, patient in combined_x.iterrows():
         "bmi" : [patient['bmi']]
     })
 
+    cere_cor_scaler = jl.load("models/cerebo-coronary/ann_scaler.pkl")
+    cere_cor_ann_record = cere_cor_scaler.transform(cere_cor_record)
+
+    cere_cor_le = LabelEncoder()
+    cere_cor_le.fit([1, 2])
+
     health_art_results = []
     health_cere_results = []
     health_cor_results = []
@@ -238,19 +264,37 @@ for index, patient in combined_x.iterrows():
         result = int(value.predict(health_art_record))
         health_art_results.append(result)
 
+    result = ann_health_art.predict(health_art_ann_record, verbose=0)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    result = health_art_le.inverse_transform(result)
+    health_art_results.append(result)
+
     for key, value in health_cere_models.items():
         result = int(value.predict(health_cere_record))
         health_cere_results.append(result)
+
+    result = ann_health_cere.predict(health_cere_ann_record, verbose=0)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    result = health_cere_le.inverse_transform(result)
+    health_cere_results.append(result)
 
     for key, value in health_cor_models.items():
         result = int(value.predict(health_cor_record))
         health_cor_results.append(result)
 
+    result = ann_health_cor.predict(health_cor_ann_record, verbose=0)
+    result = np.where(result > 0.5, 1, 0)
+    np.ravel(result)
+    #result = health_cor_le.inverse_transform(result)
+    health_cor_results.append(result)
+
     #print(health_art_results)
     #print(health_cere_results)
     #print(health_cor_results)
 
-    if sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
+    if sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         #print("You are predicted healthy")
         pred_list.append(0)
         count = 'healthy'
@@ -258,7 +302,7 @@ for index, patient in combined_x.iterrows():
         if index < 1289:
             healthy_count += 1
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         #print("The classifier has predicted that you may have arterial disease")
         pred_list.append(3)
         count = 'arterial'
@@ -266,7 +310,7 @@ for index, patient in combined_x.iterrows():
         if index >= 2012 and index < 2165:
             art_count += 1
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
         #print("The classifier has predicted that you may have cerebovasular disease")
         pred_list.append(2)
         count = 'cerebovascular'
@@ -274,7 +318,7 @@ for index, patient in combined_x.iterrows():
         if index >= 1621 and index < 2012:
             cere_count += 1
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
         #print("The classifier has predicted that you may have coronary heart disease")
         pred_list.append(1)
         count = 'coronary'
@@ -282,13 +326,19 @@ for index, patient in combined_x.iterrows():
         if index >= 1289 and index < 1621:
             cor_count += 1
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
 
         art_cere_results = []
 
         for key, value in art_cere_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cere_results.append(result)
+
+        result = ann_art_cere.predict(art_cere_ann_record, verbose=0)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = art_cere_le.inverse_transform(result)
+        art_cere_results.append(result)
 
         if art_cere_results.count(2) >= art_cere_results.count(3):
             pred_list.append(2)
@@ -308,13 +358,19 @@ for index, patient in combined_x.iterrows():
         #art_cere_results = art_cere_results.map(formatResultsArt)
         #print(art_cere_results)
 
-    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
 
         cere_cor_results = []
 
         for key, value in cere_cor_models.items():
             result = int(value.predict(cere_cor_record))
             cere_cor_results.append(result)
+
+        result = ann_cere_cor.predict(cere_cor_ann_record, verbose=0)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = cere_cor_le.inverse_transform(result)
+        cere_cor_results.append(result)
 
         if cere_cor_results.count(2) >= cere_cor_results.count(1):
             pred_list.append(2)
@@ -334,14 +390,19 @@ for index, patient in combined_x.iterrows():
         #cere_cor_results = cere_cor_results.map(formatResultsCor)
         #print(cere_cor_results)
 
-    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
-
+    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
 
         art_cor_results = []
 
         for key, value in art_cor_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cor_results.append(result)
+
+        result = ann_art_cor.predict(art_cor_ann_record, verbose=0)
+        result = np.where(result > 0.5, 1, 0)
+        np.ravel(result)
+        result = art_cor_le.inverse_transform(result)
+        art_cor_results.append(result)
 
         if art_cor_results.count(3) >= art_cor_results.count(1):
             pred_list.append(3)

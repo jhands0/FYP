@@ -16,19 +16,21 @@ import joblib as jl
 
 import argparse
 
-# Arguments
-
+# Parsing in dataset and folder arguments for batch file
 parser = argparse.ArgumentParser(prog='Model Testing')
 parser.add_argument('dataset')
 parser.add_argument('-f', '--folder')
 args = parser.parse_args()
 
+# Reading in the selected dataset
 data = pd.read_csv(args.dataset)
 classifier = args.folder
 
+# Spliting dataset into features and label
 X = data.drop(columns=['Unnamed: 0', 'label'])
 y = data['label']
 
+# Spliting dataset into test and training data
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42, test_size=0.25)
 
 # Import models
@@ -58,33 +60,32 @@ models = {"decision_tree" : dt,
 # Predictions
 
 for name, model in models.items():
-    positive_label = min(y_test)
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred, pos_label=positive_label) 
-    rec = recall_score(y_test, y_pred, pos_label=positive_label)
-    f1 = f1_score(y_test, y_pred, pos_label=positive_label)
+    positive_label = min(y_test) # Set positive result to the minimum of the two classes 0, 1 or 2
+    y_pred = model.predict(X_test) # Make a prediction
+    #acc = accuracy_score(y_test, y_pred)
+    #prec = precision_score(y_test, y_pred, pos_label=positive_label) 
+    #rec = recall_score(y_test, y_pred, pos_label=positive_label)
+    #f1 = f1_score(y_test, y_pred, pos_label=positive_label)
+    acc, prec, rec, f1 = cross_validate(model, X_test, y_test, scoring=('accuracy', 'precision', 'recall', 'f1'), cv=4)
     print(f"Accuracy score for {name} is {acc * 100}")
     print(f"Precison score for {name} is {prec * 100}")
     print(f"Recall score for {name} is {rec * 100}")
     print(f"f1 score for {name} is {f1 * 100}")
-    #acc, prec, rec, f1 = cross_validate(model, X_test, y_test, scoring=('accuracy', 'precision', 'recall', 'f1'), cv=4)
-    cm = confusion_matrix(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred) # Create a confusion matrix of results
     plt.figure(figsize=(10, 7))
     cm_plot = sns.heatmap(cm, annot=True)
-    cm_plot.figure.savefig(f"models/{classifier}/{name}.png")
+    cm_plot.figure.savefig(f"models/{classifier}/{name}.png") # Save the confusion matrix figure
 
 
 results = ann.evaluate(X_ann_test, y_ann_test, batch_size=64, verbose=0)
 acc = results[1]
 print(f"Accuracy score for artifical_neural_network is {acc * 100}")
-
 predictions = ann.predict(X_ann_test, batch_size=64, verbose=0)
 predictions = np.where(predictions > 0.5, 1, 0)
 #acc, prec, rec, f1 = cross_validate(ann, X_ann_test, y_ann_test, scoring=('accuracy', 'precision', 'recall', 'f1'), cv=4)
-prec = precision_score(y_ann_test, predictions, pos_label=1)
-rec = recall_score(y_ann_test, predictions, pos_label=1)
-f1 = f1_score(y_ann_test, predictions, pos_label=1)
+#prec = precision_score(y_ann_test, predictions, pos_label=1)
+#rec = recall_score(y_ann_test, predictions, pos_label=1)
+#f1 = f1_score(y_ann_test, predictions, pos_label=1)
 print(f"Precison score for artificial_neural_network is {prec * 100}")
 print(f"Recall score for artifical_neural_network is {rec * 100}")
 print(f"f1 score for artificial_neural_network is {f1 * 100}")

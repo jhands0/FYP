@@ -157,18 +157,20 @@ plt.show()
 sns.histplot(final_arterial, x="label")
 plt.show()
 
-'''
-visualise_df = pd.DataFrame()
-visualise_df['y'] = pd.concat([final_coronary['label'], final_cerebo['label'], final_arterial['label']], ignore_index=True)
-visualise_df['x'] = np.zeros(visualise_df['y'].shape)
+sm = SMOTE(random_state=101, k_neighbors=5)
 
-visualise_df_smote = pd.DataFrame()
-
-sm = SMOTE(random_state=24, k_neighbors=5)
-visualise_df_smote['x'], visualise_df_smote['y'] = sm.fit_resample(visualise_df['x'].reshape(-1, 1), visualise_df['y'].reshape(-1, 1))
-sns.histplot(visualise_df_smote['y'])
+x, y = sm.fit_resample(final_coronary.drop(columns=['label']), final_coronary['label'])
+sns.histplot(y)
 plt.show()
-'''
+
+x, y = sm.fit_resample(final_cerebo.drop(columns=['label']), final_cerebo['label'])
+sns.histplot(y)
+plt.show()
+
+x, y = sm.fit_resample(final_arterial.drop(columns=['label']), final_arterial['label'])
+sns.histplot(y)
+plt.show()
+
 
 # Creation of combined arterial/coronary dataset with common features
 classifier_arterial_coronary = pd.DataFrame(columns=['age', 'sex', 'blood_pressure', 'heart_rate', 'label'])

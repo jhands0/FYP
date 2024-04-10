@@ -8,32 +8,56 @@ import pandas as pd
 import joblib as jl
 
 def y_or_n_to_num(value):
-    if value == "yes":
+    '''
+    Function used to binaraize string values for yes, no and male
+    '''
+    if value == "yes" or value == "y" or value == "Y" or value == "Yes":
         return 1
-    elif value == "male":
+    elif value == "male" or value == "m" or value == "Male" or value == "M":
         return 1
     else:
         return 0
 
 def preprocess(record):
-    age = record[0].get()
-    sex = y_or_n_to_num(record[1].get())
-    height = float(record[2].get())
-    weight = int(record[3].get())
-    bmi = weight / height ** 2
-    smoker = y_or_n_to_num(record[4].get())
-    tobacco = record[5].get()
-    alcohol = y_or_n_to_num(record[6].get())
-    diabetes = y_or_n_to_num(record[7].get())
-    fam_hist = y_or_n_to_num(record[8].get())
-    bp_meds = y_or_n_to_num(record[9].get())
-    bp = record[10].get()
-    heart_rate = record[11].get()
-    chol = record[12].get()
+    '''
+    Function to convert all user input into a format that the classifier can read
+    '''
 
+    # Parsing in all user input from the tkinter entry boxes, doing type checking for all values
+    age = int(record[0].get())
+    sex = y_or_n_to_num(str(record[1].get()))
+    height = float(record[2].get())
+    weight = float(record[3].get())
+    bmi = weight / height ** 2 # Calculate the BMI from height and weight
+    smoker = y_or_n_to_num(str(record[4].get()))
+    tobacco = float(record[5].get())
+    alcohol = y_or_n_to_num(str(record[6].get()))
+    diabetes = y_or_n_to_num(str(record[7].get()))
+    fam_hist = y_or_n_to_num(str(record[8].get()))
+    bp_meds = y_or_n_to_num(str(record[9].get()))
+    bp = float(record[10].get())
+    heart_rate = float(record[11].get())
+    chol = float(record[12].get())
+
+    # Return an array containing all the features in the order they were asked
     return [age, sex, bmi, smoker, tobacco, alcohol, diabetes, fam_hist, bp_meds, bp, heart_rate, chol]
 
 def get_results(record):
+    '''
+    This large function loads in every classifier and model used to make predictions on the user data
+
+    It also converts the user record to six different dataframes for the six classifiers, removing uneeded user input when necessary
+
+    Uses the dataframes as input to the classifiers
+
+    Uses an if-else statement to aggregate the scores of the classifiers by seeing if they pass number of model thresholds
+
+    If the diagnosis classifier thinks that the person has a type of CVD, test record on a classifier in the distingusing phase
+
+    Returns four scores for each class, Healthy, CHD, Cerebrovascular, and Arterial
+    '''
+
+    # Loading models for each classifier
     ann_health_art = jl.load("models/healthy-arterial/artificial_neural_network.pkl")
     dt_health_art = jl.load("models/healthy-arterial/decision_tree.pkl")
     gnb_health_art = jl.load("models/healthy-arterial/gaussian_naive_bayes.pkl")
@@ -136,6 +160,7 @@ def get_results(record):
         "Random Forest" : rf_art_cor
     }
 
+    # Create a subset of the answers to be used in the healthy patient / arterial disease classifier
     health_art_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
@@ -144,12 +169,15 @@ def get_results(record):
         "heart_rate" : [record[10]]
     })
 
+    # Load the standard scaler used to scale the healthy-arterial dataset
     health_art_scaler = jl.load("models/healthy-arterial/ann_scaler.pkl")
     health_art_ann_record = health_art_scaler.transform(health_art_record)
 
+    # Load in label encoder and train it
     health_art_le = LabelEncoder()
     health_art_le.fit([0, 3])
 
+    # Create a subset of the answers to be used in the healthy patient / cerebovascular disease classifier
     health_cere_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
@@ -163,12 +191,15 @@ def get_results(record):
         "bmi" : [record[2]]
     })
 
+    # Load the standard scaler used to scale the healthy-cerebo dataset
     health_cere_scaler = jl.load("models/healthy-cerebo/ann_scaler.pkl")
     health_cere_ann_record = health_cere_scaler.transform(health_cere_record)
 
+    # Load in label encoder and train it
     health_cere_le = LabelEncoder()
     health_cere_le.fit([0, 2])
 
+    # Create a subset of the answers to be used in the healthy patient / coronary heart disease classifier
     health_cor_record = pd.DataFrame({
         "age" : [record[0]],
         "smoker" : [record[3]], 
@@ -179,9 +210,11 @@ def get_results(record):
         "alcohol" : [record[5]]
     })
 
+    # Load the standard scaler used to scale the healthy-coronary dataset
     health_cor_scaler = jl.load("models/healthy-coronary/ann_scaler.pkl")
     health_cor_ann_record = health_cor_scaler.transform(health_cor_record)
 
+    # Create a subset of the answers to be used in the arterial disease / cerebovascular disease and arterial disease / cerebovascular disease classifier
     art_cere_cor_record = pd.DataFrame({
         "age" : [record[0]],
         "sex" : [record[1]],
@@ -190,18 +223,23 @@ def get_results(record):
         "heart_rate" : [record[10]]
     })
 
+    # Load the standard scaler used to scale the arterial-cerebo dataset
     art_cere_scaler = jl.load("models/arterial-cerebo/ann_scaler.pkl")
     art_cere_ann_record = art_cere_scaler.transform(art_cere_cor_record)
 
+    # Load in label encoder and train it
     art_cere_le = LabelEncoder()
     art_cere_le.fit([2, 3])
 
+    # Load the standard scaler used to scale the arterial-coronary dataset
     art_cor_scaler = jl.load("models/arterial-coronary/ann_scaler.pkl")
     art_cor_ann_record = art_cor_scaler.transform(art_cere_cor_record)
 
+    # Load in label encoder and train it
     art_cor_le = LabelEncoder()
     art_cor_le.fit([1, 3])
 
+    # Create a subset of the answers to be used in the cerebovasuclar disease / coronary heart disease classifier
     cere_cor_record = pd.DataFrame({
         "age" : [record[0]],
         "smoker" : [record[3]], 
@@ -210,151 +248,206 @@ def get_results(record):
         "bmi" : [record[2]]
     })
 
+    # Load the standard scaler used to scale the cerebo-coronary dataset
     cere_cor_scaler = jl.load("models/cerebo-coronary/ann_scaler.pkl")
     cere_cor_ann_record = cere_cor_scaler.transform(cere_cor_record)
 
+    # Load in label encoder and train it
     cere_cor_le = LabelEncoder()
     cere_cor_le.fit([1, 2])
 
+    # Create lists to store results of each diagnosis classifier
     health_art_results = []
     health_cere_results = []
     health_cor_results = []
 
+    # Enumerate over models and make predictions for healthy arterial classifier
     for key, value in health_art_models.items():
         result = int(value.predict(health_art_record))
         health_art_results.append(result)
 
+    # Make a prediction for the neural network
     result = ann_health_art.predict(health_art_ann_record)
+    # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
+    # Convert 0 and 1 to 0 and 3
     result = health_art_le.inverse_transform(result)
     health_art_results.append(result)
 
+    # Enumerate over models and make predictions for healthy cerebovascular classifier
     for key, value in health_cere_models.items():
         result = int(value.predict(health_cere_record))
         health_cere_results.append(result)
 
+    # Make a prediction for the neural network
     result = ann_health_cere.predict(health_cere_ann_record)
+    # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
+    # Convert 0 and 1 to 0 and 2
     result = health_cere_le.inverse_transform(result)
     health_cere_results.append(result)
 
+    # Enumerate over models and make predictions for healthy coronary classifier
     for key, value in health_cor_models.items():
         result = int(value.predict(health_cor_record))
         health_cor_results.append(result)
 
+    # Make a prediction for the neural network
     result = ann_health_cor.predict(health_cor_ann_record)
+    # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
-    #result = health_cor_le.inverse_transform(result)
     health_cor_results.append(result)
 
+    # Compare the diagnosis classifier results to classifier thresholds
     if sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
-        art_percent = health_art_results.count(3) / 7
-        cere_percent = health_cere_results.count(2) / 7
-        cor_percent = health_cor_results.count(1) / 7
-        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
-        art_percent = health_art_results.count(3) / 7
-        cere_percent = health_cere_results.count(2) / 7
-        cor_percent = health_cor_results.count(1) / 7
-        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
-        art_percent = health_art_results.count(3) / 7
-        cere_percent = health_cere_results.count(2) / 7
-        cor_percent = health_cor_results.count(1) / 7
-        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
-        art_percent = health_art_results.count(3) / 7
-        cere_percent = health_cere_results.count(2) / 7
-        cor_percent = health_cor_results.count(1) / 7
-        healthy_percent = ((1 - art_percent) + (1 - cere_percent) + (1 - cor_percent)) / 21
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
 
         art_cere_results = []
 
+        # Enumerate over models and make predictions for arterial disease cerebovascular disease classifier
         for key, value in art_cere_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cere_results.append(result)
 
+        # Make a prediction for the neural network
         result = ann_art_cere.predict(art_cere_ann_record)
+        # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        # Convert 0 and 1 to 2 and 3
         result = art_cere_le.inverse_transform(result)
         art_cere_results.append(result)
 
-        if art_cere_results.count(2) >= art_cere_results.count(3):
-            print("The classifier has predicted that you may have cerebovasular disease")
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = (health_art_results.count(3) + art_cere_results.count(3)) / 14
+        cere_score = (health_cere_results.count(2) + art_cere_results.count(2)) / 14
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
-        else:
-            print("The classifier has predicted that you may have arterial disease")
-
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
 
         cere_cor_results = []
 
+        # Enumerate over models and make predictions for arterial disease cerebovascular disease classifier
         for key, value in cere_cor_models.items():
             result = int(value.predict(cere_cor_record))
             cere_cor_results.append(result)
 
+        # Make a prediction for the neural network
         result = ann_cere_cor.predict(cere_cor_ann_record)
+        # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        #Convert 0 and 1 to 1 and 2
         result = cere_cor_le.inverse_transform(result)
-        art_cere_results.append(result)
+        cere_cor_results.append(result)
 
-        if cere_cor_results.count(2) >= cere_cor_results.count(1):
-            print("The classifier has predicted that you may have cerebovasular disease")
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = (health_cere_results.count(2) + cere_cor_results.count(2)) / 14
+        cor_score = (health_cor_results.count(1) + cere_cor_results.count(1)) / 14
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
-        else:
-            print("The classifier has predicted that you may have coronary heart disease")
-
+    # Compare the diagnosis classifier results to classifier thresholds
     elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
 
         art_cor_results = []
 
+        # Enumerate over models and make predictions for arterial disease cerebovascular disease classifier
         for key, value in art_cor_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cor_results.append(result)
 
+        # Make a prediction for the neural network
         result = ann_art_cor.predict(art_cor_ann_record)
+        # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        #Convert 0 and 1 to 1 and 3
         result = art_cor_le.inverse_transform(result)
         art_cor_results.append(result)
 
-        if art_cor_results.count(3) >= art_cor_results.count(1):
-            print("The classifier has predicted that you may have arterial heart disease")
-
-        else:
-            print("The classifier has predicted that you may have coronary heart disease")
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = (health_art_results.count(3) + art_cor_results.count(3)) / 14
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = (health_cor_results.count(1) + art_cor_results.count(1)) / 14
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
 
     else:
-        print("The classifier has predicted that you may have coronary heart disease")
-        print("The classifier has predicted that you may have cerebovascular disease")
-        print("The classifier has predicted that you may have arterial disease")
+        # Calculate the scores by dividing the number of occurances of the class in the classifiers by the number of models the class can appear in 
+        art_score = health_art_results.count(3) / 7
+        cere_score = health_cere_results.count(2) / 7
+        cor_score = health_cor_results.count(1) / 7
+        healthy_score = (health_art_results.count(0) + health_cere_results.count(0) + health_cor_results.count(0)) / 21
 
-    return [healthy_percent * 100, cor_percent * 100, cere_percent * 100, art_percent * 100]
+    return [healthy_score * 100, cor_score * 100, cere_score * 100, art_score * 100]
 
 
 def result():
+    '''
+    Function ran when the Results button is pressed on the GUI, preprocesses the input data, runs the combined classifier,
+    preprocesses the result, and sets an output message using the messagebox tkinter widget
+    '''
+    # Preprocesses the input record using type checking in the preprocess function
     pre_record = preprocess(entries)
-    healthy, coronary, cerebo, arterial = get_results(pre_record)
-    healthy_message = f"The classifier predicted a {healthy}% chance of you being healthy"
-    coronary_message = f"The classifier predicted a {coronary}% chance of you being at risk of Coronary Heart disease"
-    cerebo_message = f"The classifier predicted a {cerebo}% chance of you being at risk of Cerebovascular disease"
-    arterial_message = f"The classifier predicted a {arterial}% chance of you being at risk of Cerebovascular disease"
-    messagebox.showinfo(title="Results", message=f"{healthy_message}\n{coronary_message}\n{cerebo_message}\n{arterial_message}")
 
+    # Runs the combined classifier 
+    healthy_percent, coronary_percent, cerebo_percent, arterial_percent = get_results(pre_record)
+
+    # Converts all the percentage scores to 2 decimal places
+    healthy_percent = '{0:.2f}'.format(healthy_percent) 
+    coronary_percent = '{0:.2f}'.format(coronary_percent)
+    cerebo_percent = '{0:.2f}'.format(cerebo_percent)
+    arterial_percent = '{0:.2f}'.format(arterial_percent)
+
+    # Creates human readable messages of the percentages for an end user  
+    healthy_message = f"The classifier predicted a {healthy_percent}% chance of you being healthy."
+    coronary_message = f"The classifier predicted a {coronary_percent}% chance of you being at risk of Coronary Heart disease."
+    cerebo_message = f"The classifier predicted a {cerebo_percent}% chance of you being at risk of Cerebovascular disease."
+    arterial_message = f"The classifier predicted a {arterial_percent}% chance of you being at risk of Arterial disease."
+    messagebox.showinfo(title="Results", message=f"{healthy_message}\n\n{coronary_message}\n\n{cerebo_message}\n\n{arterial_message}")
+
+# Creates GUI and adds a fitting title
 root = tk.Tk()
 root.title("Heart Disease Prediction and Classification")
 
+# List of questions that will be added to the GUI in a grid alongside entry boxes
 questions = [
     "What is your age?", 
     "What is your sex?", 
@@ -372,13 +465,16 @@ questions = [
     ]
 entries = []
 
-for i, question in enumerate(questions):
+for i, question in enumerate(questions): #For every question asked
+    # Make a tkinter label containing the question in row i, column 0
     tk.Label(root, text=question).grid(row=i, column=0)
+
+    # Add a tkinter entry object to the entries list
     entries.append(tk.Entry(root))
     entries[-1].grid(row=i, column=1)
 
-tk.Button(root, text="Results", command=result).grid(row=len(questions), column=1)
+tk.Button(root, text="Results", command=result).grid(row=13, column=1)
 
-
+# Starts the GUI when the script is ran
 if __name__ == "__main__":
     root.mainloop()

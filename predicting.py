@@ -11,10 +11,11 @@ import joblib as jl
 
 import tkinter as tk
 
-# CLI
-
 
 def y_or_n_to_num(value):
+    '''
+    Function used to binaraize string values for yes, no, male and female
+    '''
     if value == "y":
         return 1
     elif value == "male":
@@ -22,37 +23,12 @@ def y_or_n_to_num(value):
     else:
         return 0
 
-age = int(input("\nWhat is your's age? "))
+# Questionare questions with input error handling
 
-sex = str(input("\nWhat is your's sex? "))
+age = int(input("\nWhat is your age? "))
+
+sex = str(input("\nWhat is your sex? "))
 sex = y_or_n_to_num(sex)
-
-smoker = str(input("\nDo you smoke? (y/n) "))
-
-if smoker == "y":
-    smoker_num = 1
-    cigs_per_week = int(input("\nHow many cigerettes do you have per week? "))
-else:
-    smoker_num = 0
-    cigs_per_week = 0
-
-bp = int(input("\nWhat is your blood pressure? "))
-
-bp_meds = str(input("\nDo you take any blood pressure medicine? (y/n) "))
-bp_meds = y_or_n_to_num(bp_meds)
-
-diabetes = str(input("\nDo you have diabetes? (y/n) "))
-diabetes = y_or_n_to_num(diabetes)
-
-chol = int(input("\nWhat is your cholesterol value? "))
-
-heart_rate = int(input("\nWhat is your active heart rate? "))
-
-chest_pain = str(input("\nDo you have any chest pain? (y/n) "))
-chest_pain = y_or_n_to_num(chest_pain)
-
-fam_hist = str(input("\nDo you have any relatives that have been diagnosed with cardiovasular disease? (y/n) "))
-fam_hist = y_or_n_to_num(fam_hist)
 
 height = float(input("\nWhat is your height? (in metres) "))
 
@@ -60,15 +36,37 @@ weight = float(input("\nWhat is your weight? (in kg) "))
 
 bmi = weight / height ** 2
 
+smoker = str(input("\nDo you smoke? (y/n) "))
+
+if smoker == "y":
+    smoker_num = 1
+    cigs_per_week = int(input("\nHow many cigerettes do you have per week? "))
+    # Skip the question regarding cigerettes if the user said no to smoking question
+else:
+    smoker_num = 0
+    cigs_per_week = 0
+
 alcohol = str(input("\nDo you drink alcohol? (y/n) "))
 alcohol = y_or_n_to_num(alcohol)
 
-bs = str(input("\nDo you have a blood sugar disorder? (y/n) "))
-bs = y_or_n_to_num(bs)
+diabetes = str(input("\nDo you have diabetes? (y/n) "))
+diabetes = y_or_n_to_num(diabetes)
 
+fam_hist = str(input("\nDo you have any relatives that have been diagnosed with cardiovasular disease? (y/n) "))
+fam_hist = y_or_n_to_num(fam_hist)
+
+bp_meds = str(input("\nDo you take any blood pressure medication? (y/n) "))
+bp_meds = y_or_n_to_num(bp_meds)
+
+bp = int(input("\nWhat is your current systolic blood pressure? "))
+
+heart_rate = int(input("\nWhat is your active heart rate? "))
+
+chol = int(input("\nWhat is your current cholesterol value? "))
 print("\n")
 
 
+# Record all answers in a dataframe
 record = pd.DataFrame({
     "age" : [age], 
     "sex" : [sex], 
@@ -79,21 +77,21 @@ record = pd.DataFrame({
     "diabetes" : [diabetes], 
     "cholesterol" : [chol], 
     "heart_rate" : [heart_rate], 
-    "chest_pain" : [chest_pain], 
     "family_history" : [fam_hist], 
     "bmi" : [bmi], 
     "alcohol" : [alcohol]
 })
 
+# Create a subset of the answers to be used in the healthy patient / arterial disease classifier
 health_art_record = pd.DataFrame({
     "age" : [age],
     "sex" : [sex],
-    "chest_pain" : [chest_pain],
     "blood_pressure" : [bp],
     "cholesterol" : [chol],
     "heart_rate" : [heart_rate]
 })
 
+# Create a subset of the answers to be used in the healthy patient / cerebovascular disease classifier
 health_cere_record = pd.DataFrame({
     "age" : [age], 
     "sex" : [sex], 
@@ -107,6 +105,7 @@ health_cere_record = pd.DataFrame({
     "bmi" : [bmi]
 })
 
+# Create a subset of the answers to be used in the healthy patient / coronary heart disease classifier
 health_cor_record = pd.DataFrame({
     "age" : [age], 
     "smoker" : [smoker_num], 
@@ -117,6 +116,7 @@ health_cor_record = pd.DataFrame({
     "alcohol" : [alcohol]
 })
 
+# Create a subset of the answers to be used in the arterial disease / cerebovascular disease classifier
 art_cere_record = pd.DataFrame({
     "age" : [age], 
     "sex" : [sex], 
@@ -125,6 +125,7 @@ art_cere_record = pd.DataFrame({
     "heart_rate" : [heart_rate]
 })
 
+# Create a subset of the answers to be used in the arterial disease / coronary heart disease classifier
 art_cor_record = pd.DataFrame({
     "age" : [age], 
     "sex" : [sex], 
@@ -133,6 +134,7 @@ art_cor_record = pd.DataFrame({
     "heart_rate" : [heart_rate]
 })
 
+# Create a subset of the answers to be used in the cerebovasuclar disease / coronary heart disease classifier
 cere_cor_record = pd.DataFrame({
     "age" : [age], 
     "smoker" : [smoker_num], 
@@ -150,6 +152,7 @@ lr_health_art = jl.load("models/healthy-arterial/logistic_regression.pkl")
 rf_health_art = jl.load("models/healthy-arterial/random_forest.pkl")
 svm_health_art = jl.load("models/healthy-arterial/support_vector_machine.pkl")
 
+#Create a separate dictionary for every classifier with names
 health_art_models = {
     "Support Vector Machine" : svm_health_art,
     "K-Neighbor" : knn_health_art, 
@@ -193,30 +196,22 @@ health_cor_models = {
 
 # Predicting
 
+# Records used to hold the results of the models in the diagnois phase classifiers
 health_art_results = []
 health_cere_results = []
 health_cor_results = []
 
-def formatResultsArt(value):
-    if value == 1:
-        return "Arterial Disease"
-    elif value == 2:
-        return "Cerebovascular Disease"
-    
-def formatResultsCor(value):
-    if value == 1:
-        return "Coronary Heart Disease"
-    elif value == 2:
-        return "Cerebovasular Disease"
-
+# Enumerate over healthy patient / arterial disease and make a prediction for each model, adding it to the results list
 for key, value in health_art_models.items():
     result = int(value.predict(health_art_record))
     health_art_results.append(result)
 
+# Enumerate over healthy patient / cerebovasular disease and make a prediction for each model, adding it to the results list
 for key, value in health_cere_models.items():
     result = int(value.predict(health_cere_record))
     health_cere_results.append(result)
 
+# Enumerate over healthy patient / coronary heart disease and make a prediction for each model, adding it to the results list
 for key, value in health_cor_models.items():
     result = int(value.predict(health_cor_record))
     health_cor_results.append(result)
@@ -224,6 +219,7 @@ for key, value in health_cor_models.items():
 print(health_art_results)
 print(health_cere_results)
 print(health_cor_results)
+
 
 if sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(health_cor_results) < 4:
     print("You are predicted healthy")
@@ -239,6 +235,7 @@ elif sum(health_art_results) < 12 and sum(health_cere_results) < 8 and sum(healt
 
 elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 4:
 
+    # Load in the additional classifier needed for arterial disease / cerebovasular disease classification
     dt_art_cere = jl.load("models/arterial-cerebo/decision_tree.pkl")
     gnb_art_cere = jl.load("models/arterial-cerebo/gaussian_naive_bayes.pkl")
     knn_art_cere = jl.load("models/arterial-cerebo/k_neighbor.pkl")
@@ -257,16 +254,17 @@ elif sum(health_art_results) >= 12 and sum(health_cere_results) >= 8 and sum(hea
 
     art_cere_results = []
 
+    # Enumerates over the arterial disease / cerebovascular disease classifiers and makes a prediction for each model, adding it to the results list
     for key, value in art_cere_models.items():
         result = int(value.predict(art_cere_record))
         art_cere_results.append(result)
 
     print("\n")
-    #art_cere_results = art_cere_results.map(formatResultsArt)
     print(art_cere_results)
 
 elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 4:
 
+    # Load in the additional classifier needed for coronary heart disease / cerebovasular disease classification
     dt_cere_cor = jl.load("models/cerebo-coronary/decision_tree.pkl")
     gnb_cere_cor = jl.load("models/cerebo-coronary/gaussian_naive_bayes.pkl")
     knn_cere_cor = jl.load("models/cerebo-coronary/k_neighbor.pkl")
@@ -285,16 +283,17 @@ elif sum(health_art_results) < 12 and sum(health_cere_results) >= 8 and sum(heal
 
     cere_cor_results = []
 
+    # Enumerates over coronary heart disease / cerebovascular disease classifier and makes a prediction for each model, adding it to the results list
     for key, value in cere_cor_models.items():
         result = int(value.predict(cere_cor_record))
         cere_cor_results.append(result)
 
     print("\n")
-    #cere_cor_results = cere_cor_results.map(formatResultsCor)
     print(cere_cor_results)
 
 elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 4:
 
+    # Load in the additional classifier needed for coronary heart disease / arterial disease classification
     dt_art_cor = jl.load("models/arterial-coronary/decision_tree.pkl")
     gnb_art_cor = jl.load("models/arterial-coronary/gaussian_naive_bayes.pkl")
     knn_art_cor = jl.load("models/arterial-coronary/k_neighbor.pkl")
@@ -313,10 +312,10 @@ elif sum(health_art_results) >= 12 and sum(health_cere_results) < 8 and sum(heal
 
     art_cor_results = []
 
+    # Enumerates over coronary heart disease / arterial disease classifier and makes a prediction for each model, adding it to the results list
     for key, value in art_cor_models.items():
         result = int(value.predict(art_cor_record))
         art_cor_results.append(result)
 
     print("\n")
-    #cere_cor_results = cere_cor_results.map(formatResultsCor)
     print(art_cor_results)
