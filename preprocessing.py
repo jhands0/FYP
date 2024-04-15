@@ -53,7 +53,7 @@ def convertDaytoWeek(value):
     return value
 
 def max_to_active(value):
-    return value * 0.50
+    return value * 0.77
 
 # Age, Sex, Smoker, Tobacco, BPMeds, Diabetes, Cholestrol, Blood Pressure, Heart Rate, BMI, Label (Glucose maybe?)
 cerebo_coronary.loc[((cerebo_coronary.prevalentStroke == 1) & (cerebo_coronary.TenYearCHD == 1)), 'TenYearCHD'] = 2

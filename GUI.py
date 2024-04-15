@@ -267,7 +267,7 @@ def get_results(record):
         health_art_results.append(result)
 
     # Make a prediction for the neural network
-    result = ann_health_art.predict(health_art_ann_record)
+    result = ann_health_art.predict(health_art_ann_record, verbose=0)
     # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
@@ -281,7 +281,7 @@ def get_results(record):
         health_cere_results.append(result)
 
     # Make a prediction for the neural network
-    result = ann_health_cere.predict(health_cere_ann_record)
+    result = ann_health_cere.predict(health_cere_ann_record, verbose=0)
     # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
@@ -295,7 +295,7 @@ def get_results(record):
         health_cor_results.append(result)
 
     # Make a prediction for the neural network
-    result = ann_health_cor.predict(health_cor_ann_record)
+    result = ann_health_cor.predict(health_cor_ann_record, verbose=0)
     # Convert any values greater than 0.5 to 1, anything else to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
@@ -344,7 +344,7 @@ def get_results(record):
             art_cere_results.append(result)
 
         # Make a prediction for the neural network
-        result = ann_art_cere.predict(art_cere_ann_record)
+        result = ann_art_cere.predict(art_cere_ann_record, verbose=0)
         # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
@@ -369,7 +369,7 @@ def get_results(record):
             cere_cor_results.append(result)
 
         # Make a prediction for the neural network
-        result = ann_cere_cor.predict(cere_cor_ann_record)
+        result = ann_cere_cor.predict(cere_cor_ann_record, verbose=0)
         # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
@@ -394,7 +394,7 @@ def get_results(record):
             art_cor_results.append(result)
 
         # Make a prediction for the neural network
-        result = ann_art_cor.predict(art_cor_ann_record)
+        result = ann_art_cor.predict(art_cor_ann_record, verbose=0)
         # Convert any values greater than 0.5 to 1, anything else to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)

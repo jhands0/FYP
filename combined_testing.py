@@ -8,39 +8,12 @@ from sklearn.preprocessing import LabelEncoder
 import warnings
 from sklearn.exceptions import DataConversionWarning
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
-import random
 
-'''
-health_art_record = pd.read_csv("datasets/arterial.csv")
-health_art_X = health_art_record.drop(columns=['Unnamed: 0', 'label'])
-health_art_y = health_art_record['label']
+# Loading each combined dataset
+combined_x = pd.read_csv("datasets/combined_data_X.csv")
+combined_y = pd.read_csv("datasets/combined_data_y.csv")
 
-health_cere_record = pd.read_csv("datasets/cerebo_coronary.csv")
-health_cere_X = health_cere_record.drop(columns=['Unnamed: 0', 'label'])
-health_cere_y = health_cere_record['label']
-
-health_cor_record = pd.read_csv("datasets/coronary.csv")
-health_cor_X = health_cor_record.drop(columns=['Unnamed: 0', 'label'])
-health_cor_y = health_cor_record['label']
-
-art_cere_record = pd.read_csv("datasets/classifier_arterial_cerebo.csv")
-art_cere_X = art_cere_record.drop(columns=['Unnamed: 0', 'label'])
-art_cere_y = art_cere_record['label']
-
-art_cor_record = pd.read_csv("datasets/classifier_arterial_coronary.csv")
-art_cor_X = art_cor_record.drop(columns=['Unnamed: 0', 'label'])
-art_cor_y = art_cor_record['label']
-
-cere_cor_record = pd.read_csv("datasets/classifier_cerebo_coronary.csv")
-cere_cor_X = cere_cor_record.drop(columns=['Unnamed: 0', 'label'])
-cere_cor_y = cere_cor_record['label']
-'''
-
-combined_x = pd.read_csv("datasets/fake_data_X.csv")
-combined_y = pd.read_csv("datasets/fake_data_y.csv")
-
-# Loading models
-
+# Loading models for each classifier
 ann_health_art = jl.load("models/healthy-arterial/artificial_neural_network.pkl")
 dt_health_art = jl.load("models/healthy-arterial/decision_tree.pkl")
 gnb_health_art = jl.load("models/healthy-arterial/gaussian_naive_bayes.pkl")
@@ -143,39 +116,19 @@ art_cor_models = {
     "Random Forest" : rf_art_cor
 }
 
-def formatResultsArt(value):
-    if value == 1:
-        return "Arterial Disease"
-    elif value == 2:
-        return "Cerebovascular Disease"
-    
-def formatResultsCor(value):
-    if value == 1:
-        return "Coronary Heart Disease"
-    elif value == 2:
-        return "Cerebovasular Disease"
-
+# Store the results of the combined classifier in a list
 pred_list = []
-count = ''
+
+# Count the number of times a majority class was predicted
 healthy_count = 0
 art_count = 0
 cere_count = 0
 cor_count = 0
 
+# Iterating over the combined datasets
 for index, patient in combined_x.iterrows():
 
-    if index == 0:
-        print('============================= HEALTHY')
-    
-    if index == 1289:
-        print('============================= CORONARY')
-
-    if index == 1621:
-        print('============================= CEREBOVASCULAR')
-
-    if index == 2012:
-        print('============================= ARTERIAL')
-
+    # Create a subset of the answers to be used in the healthy patient / arterial disease classifier
     health_art_record = pd.DataFrame({
         "age" : [patient['age']],
         "sex" : [patient['sex']],
@@ -184,12 +137,15 @@ for index, patient in combined_x.iterrows():
         "heart_rate" : [patient['heart_rate']]
     })
 
+     # Load the standard scaler used to scale the healthy-arterial dataset
     health_art_scaler = jl.load("models/healthy-arterial/ann_scaler.pkl")
     health_art_ann_record = health_art_scaler.transform(health_art_record)
 
+    # Create a label encoder and train it on the class labels
     health_art_le = LabelEncoder()
     health_art_le.fit([0, 3])
 
+    # Create a subset of the answers to be used in the healthy patient / cerebrovascular disease classifier
     health_cere_record = pd.DataFrame({
         "age" : [patient['age']], 
         "sex" : [patient['sex']], 
@@ -203,12 +159,15 @@ for index, patient in combined_x.iterrows():
         "bmi" : [patient['bmi']]
     })
 
+     # Load the standard scaler used to scale the healthy-cerebro dataset
     health_cere_scaler = jl.load("models/healthy-cerebo/ann_scaler.pkl")
     health_cere_ann_record = health_cere_scaler.transform(health_cere_record)
 
+    # Create a label encoder and train it on the class labels
     health_cere_le = LabelEncoder()
     health_cere_le.fit([0, 2])
 
+    # Create a subset of the answers to be used in the healthy patient / coronary heart disease classifier
     health_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
         "smoker" : [patient['smoker']], 
@@ -219,9 +178,11 @@ for index, patient in combined_x.iterrows():
         "alcohol" : [patient['alcohol']]
     })
 
+     # Load the standard scaler used to scale the healthy-coronary dataset
     health_cor_scaler = jl.load("models/healthy-coronary/ann_scaler.pkl")
     health_cor_ann_record = health_cor_scaler.transform(health_cor_record)
 
+    # Create a subset of the answers to be used in the arterial patient / cerebrovascular disease and arterial disease / coronary heart disease classifier
     art_cere_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
         "sex" : [patient['sex']], 
@@ -230,18 +191,23 @@ for index, patient in combined_x.iterrows():
         "heart_rate" : [patient['heart_rate']]
     })
 
+    # Load the standard scaler used to scale the arterial-cerebrovacular dataset
     art_cere_scaler = jl.load("models/arterial-cerebo/ann_scaler.pkl")
     art_cere_ann_record = art_cere_scaler.transform(art_cere_cor_record)
 
+    # Create a label encoder and train it on the class labels
     art_cere_le = LabelEncoder()
     art_cere_le.fit([2, 3])
 
+     # Load the standard scaler used to scale the arterial-coronary dataset
     art_cor_scaler = jl.load("models/arterial-coronary/ann_scaler.pkl")
     art_cor_ann_record = art_cor_scaler.transform(art_cere_cor_record)
 
+    # Create a label encoder and train it on the class labels
     art_cor_le = LabelEncoder()
     art_cor_le.fit([1, 3])
 
+    # Create a subset of the answers to be used in the cerebrovascular disease / coronary heart disease classifier
     cere_cor_record = pd.DataFrame({
         "age" : [patient['age']], 
         "smoker" : [patient['smoker']], 
@@ -250,183 +216,177 @@ for index, patient in combined_x.iterrows():
         "bmi" : [patient['bmi']]
     })
 
+     # Load the standard scaler used to scale the cerebro-coronary dataset
     cere_cor_scaler = jl.load("models/cerebo-coronary/ann_scaler.pkl")
     cere_cor_ann_record = cere_cor_scaler.transform(cere_cor_record)
 
+    # Create a lebel encoder and train it on the class labels
     cere_cor_le = LabelEncoder()
     cere_cor_le.fit([1, 2])
 
+    # Store results for each model in the three diagnosis classifiers
     health_art_results = []
     health_cere_results = []
     health_cor_results = []
 
+    # Use each model in the healthy patient / arterial disease classifier to make a prediction
     for key, value in health_art_models.items():
         result = int(value.predict(health_art_record))
         health_art_results.append(result)
 
+    # Make a prediction for the neural network
     result = ann_health_art.predict(health_art_ann_record, verbose=0)
+    # Any value greater than 0.5 is 1, anny other value is 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
+    # Conver 0 and 1 to 0 and 3
     result = health_art_le.inverse_transform(result)
     health_art_results.append(result)
 
+    # Use each model in the healthy patient / cerebrovascular disease classifier to make a prediction
     for key, value in health_cere_models.items():
         result = int(value.predict(health_cere_record))
         health_cere_results.append(result)
 
+    # Make a prediction on the neural network
     result = ann_health_cere.predict(health_cere_ann_record, verbose=0)
+    # Any value greater than 0.5 is made 1, any other value is made 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
+    # Converts values of 0 and 1 to 0 and 2
     result = health_cere_le.inverse_transform(result)
     health_cere_results.append(result)
 
+    # Use each model in the healthy patient / coronary heart disease classifier to make a prediction
     for key, value in health_cor_models.items():
         result = int(value.predict(health_cor_record))
         health_cor_results.append(result)
 
+    # Makes a prediction for the neural network
     result = ann_health_cor.predict(health_cor_ann_record, verbose=0)
+    # Converts any value grater tha 0.5 to 1, any other value to 0
     result = np.where(result > 0.5, 1, 0)
     np.ravel(result)
-    #result = health_cor_le.inverse_transform(result)
     health_cor_results.append(result)
 
-    #print(health_art_results)
-    #print(health_cere_results)
-    #print(health_cor_results)
 
-    if sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
-        #print("You are predicted healthy")
+    if sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         pred_list.append(0)
-        count = 'healthy'
 
         if index < 1289:
             healthy_count += 1
 
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
-        #print("The classifier has predicted that you may have arterial disease")
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) < 5:
         pred_list.append(3)
-        count = 'arterial'
 
         if index >= 2012 and index < 2165:
             art_count += 1
 
-    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
-        #print("The classifier has predicted that you may have cerebovasular disease")
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
         pred_list.append(2)
-        count = 'cerebovascular'
 
         if index >= 1621 and index < 2012:
             cere_count += 1
 
-    elif sum(health_art_results) < 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
-        #print("The classifier has predicted that you may have coronary heart disease")
+    elif sum(health_art_results) < 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
         pred_list.append(1)
-        count = 'coronary'
 
         if index >= 1289 and index < 1621:
             cor_count += 1
 
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) < 5:
 
         art_cere_results = []
 
+        # Use each model in the arterial disease / cerebrovacular disease classifier to make a prediction
         for key, value in art_cere_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cere_results.append(result)
 
+        # Makes a prediction for the neural network
         result = ann_art_cere.predict(art_cere_ann_record, verbose=0)
+        # Converts all the values greater than 0.5 to 1, any other values to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        # Converts 0 and 1 to 2 and 3
         result = art_cere_le.inverse_transform(result)
         art_cere_results.append(result)
 
         if art_cere_results.count(2) >= art_cere_results.count(3):
             pred_list.append(2)
-            count = 'cerebovascular'
 
             if index >= 1621 and index < 2012:
                 cere_count += 1
 
         else:
             pred_list.append(3)
-            count = 'arterial'
 
             if index >= 2012 and index < 2165:
                 art_count += 1
 
-        #print("\n")
-        #art_cere_results = art_cere_results.map(formatResultsArt)
-        #print(art_cere_results)
-
-    elif sum(health_art_results) < 18 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) < 15 and sum(health_cere_results) >= 8 and sum(health_cor_results) >= 5:
 
         cere_cor_results = []
 
+        # Use each model in the cerebrovascular disease / coronary heart disease classifier to make a prediction
         for key, value in cere_cor_models.items():
             result = int(value.predict(cere_cor_record))
             cere_cor_results.append(result)
 
+        # Makes a prediction using the neural network
         result = ann_cere_cor.predict(cere_cor_ann_record, verbose=0)
+        # Converts values greater than 0.5 to 1, any other values to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        # Converts 0 and 1 to 1 and 2
         result = cere_cor_le.inverse_transform(result)
         cere_cor_results.append(result)
 
         if cere_cor_results.count(2) >= cere_cor_results.count(1):
             pred_list.append(2)
-            count = 'cerebovascular'
 
             if index >= 1621 and index < 2012:
                 cere_count += 1
 
         else:
             pred_list.append(1)
-            count = 'coronary'
 
             if index >= 1289 and index < 1621:
                 cor_count += 1
 
-        #print("\n")
-        #cere_cor_results = cere_cor_results.map(formatResultsCor)
-        #print(cere_cor_results)
-
-    elif sum(health_art_results) >= 18 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
+    elif sum(health_art_results) >= 15 and sum(health_cere_results) < 8 and sum(health_cor_results) >= 5:
 
         art_cor_results = []
 
+        # Use each model in the arterial disease / coronary heart disease classifier to make a prediction
         for key, value in art_cor_models.items():
             result = int(value.predict(art_cere_cor_record))
             art_cor_results.append(result)
 
+        # Makes a prediction using the neural network
         result = ann_art_cor.predict(art_cor_ann_record, verbose=0)
+        # Converts all values greater than 0.5 to 1, and other values to 0
         result = np.where(result > 0.5, 1, 0)
         np.ravel(result)
+        # Convert 0 and 1 to 1 and 3
         result = art_cor_le.inverse_transform(result)
         art_cor_results.append(result)
 
         if art_cor_results.count(3) >= art_cor_results.count(1):
             pred_list.append(3)
-            count = 'arterial'
 
             if index >= 2012 and index < 2165:
                 art_count += 1
 
         else:
             pred_list.append(1)
-            count = 'coronary'
 
             if index >= 1289 and index < 1621:
                 cor_count += 1
 
-        #print("\n")
-        #cere_cor_results = cere_cor_results.map(formatResultsCor)
-        #print(art_cor_results)
-
     else:
         
-        score = random.randint(1, 3)
-        pred_list.append(score)
-        count = 'multiple'
+        pred_list.append(8)
 
         if index >= 1289 and index < 1621:
             cor_count += 1
@@ -437,65 +397,121 @@ for index, patient in combined_x.iterrows():
         elif index >= 2012 and index < 2165:
             art_count += 1
 
-    print(count)
-
-#print(f'healthy: predicted = {pred_list.count(0)}')
-#print(f'coronary: predicted = {pred_list.count(1)}')
-#print(f'cerebovascular: predicted = {pred_list.count(2)}')
-#print(f'arterial: predicted = {pred_list.count(3)}')
-
-print("=========================")
-
-health_score = healthy_count / 1288
-print(health_score * 100)
-
-cor_score = cor_count / 333
-print(cor_score * 100)
-
-cere_score = cere_count / 391
-print(cere_score * 100)
-
-art_score = art_count / 153
-print(art_score * 100)
-
-total_score = (healthy_count + cor_count + cere_count + art_count) / 2165
-print(total_score * 100)
 
 pred = np.array(pred_list)
 real = combined_y.to_numpy()
 
-'''
-acc = accuracy_score(real, pred)
-prec = precision_score(real, pred, pos_label=0)
-rec = recall_score(real, pred, pos_label=0)
-f1 = f1_score(real, pred, pos_label=0)
-print(f"Accuracy score is {acc * 100}")
-print(f"Precision score is {prec * 100}")
-print(f"Recall score is {rec * 100}")
-print(f"f1 score is {f1 * 100}")
-'''
+# Values for all elements in the confusion matrix
+health_pred_health = 0
+health_pred_cor = 0
+health_pred_cere = 0
+health_pred_art = 0
+cor_pred_health = 0
+cor_pred_cor = 0
+cor_pred_cere = 0
+cor_pred_art = 0
+cere_pred_health = 0
+cere_pred_cor = 0
+cere_pred_cere = 0
+cere_pred_art = 0
+art_pred_health = 0
+art_pred_cor = 0
+art_pred_cere = 0
+art_pred_art = 0
 
-#real = {(combined_y == 1).sum()}
+for i in range(0, len(pred)):
+    combined = (pred[i], real[i])
+    
+    match combined:
+    # If the predicted number and actual number are the same, add a true postive
+        case (0, 0):
+            health_pred_health += 1
 
-'''
-final_results = {
-    "svm" : svm_results,
-    "knn" : knn_results, 
-    "gnb" : gnb_results, 
-    "dt" : dt_results,
-    "lr" : lr_results,
-    "rf" : rf_results
-}
+        case (1, 1) | (8, 1):
+            cor_pred_cor += 1
 
-for key, value in final_results.items():
-    acc = accuracy_score(combined_y_real, value)
-    #pre = precision_score(combined_y_real, value)
-    #rec = recall_score(combined_y_real, value)
-    cm = confusion_matrix(combined_y_real, value)
-    plt.figure(figsize=(10, 7))
-    cm_plot = sns.heatmap(cm, annot=True)
-    cm_plot.figure.savefig(f"models/{key}_cm.png")
-    print(f"Accuracy score for {key} is {acc * 100}")
-    #print(f"Precision score for {key} is {pre * 100}")
-    #print(f"Recall score for {key} is {rec * 100}")
-'''
+        case (2, 2) | (8, 2):
+            cere_pred_cere += 1
+        
+        case (3, 3) | (8, 3):
+            art_pred_art += 1
+
+    # If the pereicted and acutal don't match, add either a false positive or false negative
+        case (0, 1):
+            health_pred_cor += 1
+
+        case (0, 2):
+            health_pred_cere += 1
+
+        case (0, 3):
+            health_pred_art += 1
+
+        case (1, 0):
+            cor_pred_health += 1
+
+        case (1, 2):
+            cor_pred_cere += 1
+
+        case (1, 3):
+            cor_pred_art += 1
+
+        case (2, 0):
+            cere_pred_health += 1
+
+        case (2, 1):
+            cere_pred_cor += 1
+
+        case (2, 3):
+            cere_pred_art += 1
+
+        case (3, 0):
+            art_pred_health += 1
+
+        case (3, 1):
+            art_pred_cor += 1
+
+        case (3, 2):
+            art_pred_cere += 1
+
+# Create a confusion matrix of the results
+cm = [[health_pred_health, health_pred_cor, health_pred_cere, health_pred_art],
+      [cor_pred_health, cor_pred_cor, cor_pred_cere, cor_pred_art],
+      [cere_pred_health, cere_pred_cor, cere_pred_cere, cere_pred_art],
+      [art_pred_health, art_pred_cor, art_pred_cere, art_pred_art]]
+
+# Calculate the precision, recall and f1 score for the coronary class
+cor_prec = (cor_pred_cor) / ((cor_pred_cor) + (health_pred_cor + cere_pred_cor + art_pred_cor))
+cor_rec = (cor_pred_cor) / ((cor_pred_cor) + (cor_pred_health + cor_pred_cere + cor_pred_art))
+cor_f1 = (2 * cor_prec * cor_rec) / (cor_prec + cor_rec + 1)
+
+# Calculate the precision, recall and f1 score for the cerebrovasuclar class
+cere_prec = (cere_pred_cere) / ((cere_pred_cere) + (health_pred_cere + cor_pred_cere + art_pred_cere))
+cere_rec = (cere_pred_cere) / ((cere_pred_cere) + (cere_pred_health + cere_pred_cor + cere_pred_art))
+cere_f1 = (2 * cere_prec * cere_rec) / (cere_prec + cere_rec + 1)
+
+# Calculate precision, recall, and f1 score for the arterial class
+art_prec = (art_pred_art) / ((art_pred_art) + (health_pred_art + cor_pred_art + cere_pred_art))
+art_rec = (art_pred_art) / ((art_pred_art) + (art_pred_health + art_pred_cor + art_pred_cere))
+art_f1 = (2 * art_prec * art_rec) / (art_prec + art_rec + 1) 
+
+# Print out precision scores
+print("PRECISION")
+print(cor_prec * 100)
+print(cere_prec * 100)
+print(art_prec * 100)
+
+# Print out recall scores
+print("\nRECALL")
+print(cor_rec * 100)
+print(cere_rec * 100)
+print(art_rec * 100)
+
+# Print out the f1-scores
+print("\nF1 SCORE")
+print(cor_f1 * 100)
+print(cere_f1 * 100)
+print(art_f1 * 100)
+
+# Show the confusion matrix
+sns.heatmap(cm, annot=True)
+plt.show()

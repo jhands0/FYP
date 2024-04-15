@@ -1,4 +1,0 @@
-Healthy - Coranary, Healthy - Cerebovasclar, Healthy - Arterial
-Coranary - Cerebovascular, Cerebovascular - Arterial, Arterial - Coranary
-
-this times 7
